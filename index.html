@@ -689,35 +689,39 @@ return id;
 }
 function loadDropdown(){
 
-let customer =
-document.getElementById('customer');
+let dueCustomer =
+document.getElementById('dueCustomer');
 
-let payCustomer =
-document.getElementById('payCustomer');
+let paymentCustomer =
+document.getElementById('paymentCustomer');
 
-customer.innerHTML =
-"<option value=''>Select Customer</option>";
+dueCustomer.innerHTML =
+'<option value="">Select Customer</option>';
 
-payCustomer.innerHTML =
-"<option value=''>Select Customer</option>";
+paymentCustomer.innerHTML =
+'<option value="">Select Customer</option>';
 
-customers.forEach(c=>{
+customers.forEach(customer=>{
 
-customer.innerHTML += `
+let option1 =
+document.createElement('option');
 
-<option value="${c.id}">
-${formatCustomerId(c.id)} - ${c.name}
-</option>
+option1.value = customer.id;
 
-`;
+option1.textContent =
+customer.name;
 
-payCustomer.innerHTML += `
+dueCustomer.appendChild(option1);
 
-<option value="${c.id}">
-${formatCustomerId(c.id)} - ${c.name}
-</option>
+let option2 =
+document.createElement('option');
 
-`;
+option2.value = customer.id;
+
+option2.textContent =
+customer.name;
+
+paymentCustomer.appendChild(option2);
 
 });
 
