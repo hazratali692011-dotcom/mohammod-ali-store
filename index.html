@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
 <title>Mohammod Ali Store</title>
 
 <style>
@@ -11,27 +14,6 @@ font-family:Segoe UI;
 margin:0;
 padding:10px;
 background:linear-gradient(135deg,#4facfe,#00f2fe);
-}
-
-.marquee{
-overflow:hidden;
-white-space:nowrap;
-margin-bottom:10px;
-}
-
-.marquee h1{
-display:inline-block;
-padding-left:100%;
-animation:moveText 12s linear infinite;
-font-size:30px;
-color:white;
-text-shadow:0 0 10px black;
-}
-
-@keyframes moveText{
-0%{transform:translateX(0%);opacity:0.5;}
-50%{opacity:1;color:#ffe600;}
-100%{transform:translateX(-100%);opacity:0.5;}
 }
 
 .card{
@@ -55,12 +37,11 @@ margin-bottom:10px;
 }
 
 .summary-box{
-background:#f8f9fa;
 padding:10px;
 border-radius:10px;
-text-align:center;
 font-weight:bold;
-font-size:15px;
+text-align:center;
+font-size:16px;
 }
 
 .top-search{
@@ -85,8 +66,6 @@ margin:4px 0;
 }
 
 button{
-background:#007bff;
-color:white;
 border:none;
 font-weight:bold;
 cursor:pointer;
@@ -105,17 +84,48 @@ width:auto;
 padding:8px 10px;
 font-size:12px;
 height:38px;
+background:#007bff;
+color:white;
 }
 
-.clear-btn{background:#dc3545;width:80px;}
-.back-btn{background:#28a745;}
-.print-btn{background:#28a745;}
-.edit-btn{background:#ffc107;color:black;}
-.delete-btn{background:#dc3545;}
-.save-btn{background:#17a2b8;}
+.clear-btn{
+background:#dc3545;
+color:white;
+width:80px;
+}
 
-.section{display:none;}
-.active{display:block;}
+.back-btn{
+background:#28a745;
+color:white;
+}
+
+.print-btn{
+background:#28a745;
+color:white;
+}
+
+.edit-btn{
+background:#ffc107;
+color:black;
+}
+
+.save-btn{
+background:#17a2b8;
+color:white;
+}
+
+.delete-btn{
+background:#dc3545;
+color:white;
+}
+
+.section{
+display:none;
+}
+
+.active{
+display:block;
+}
 
 table{
 width:100%;
@@ -161,13 +171,10 @@ margin-bottom:10px;
 }
 
 </style>
+
 </head>
 
 <body>
-
-<div class="marquee">
-<h1>Mohammod Ali Store</h1>
-</div>
 
 <div class="card">
 
@@ -175,170 +182,362 @@ margin-bottom:10px;
 
 <div class="summary-grid">
 
-<div class="summary-box">
-Date: <span id="todayDate"></span><br>
-Total Sell: <span id="totalSell">0</span>
-</div>
+<div class="summary-box"
+style="background:#fff3cd;color:black;">
 
-<div class="summary-box">
-Nagad Sell: <span id="nagadSell">0</span><br>
-Due Sell: <span id="dueSell">0</span>
-</div>
+Current Date & Time<br>
+
+<span id="todayDate"></span>
 
 </div>
 
-<div class="summary-box">
-Total Current Due: <span id="totalDue">0</span> Tk
+<div class="summary-box"
+style="background:#6f42c1;color:white;">
+
+Total Sell<br>
+
+<span id="totalSell">0</span> Tk
+
+</div>
+
+<div class="summary-box"
+style="background:#28a745;color:white;">
+
+Nagad Sell<br>
+
+<span id="nagadSell">0</span> Tk
+
+</div>
+
+<div class="summary-box"
+style="background:#dc3545;color:white;">
+
+Due Sell<br>
+
+<span id="dueSell">0</span> Tk
+
+</div>
+
+</div>
+
+<div class="summary-box"
+style="background:red;color:white;font-size:18px;">
+
+Current Total Due :
+<span id="totalDue">0</span> Tk
+
 </div>
 
 <div class="top-search">
-<input id="searchCustomer" placeholder="Search Customer" onkeyup="showDashboard()">
-<button class="clear-btn" onclick="clearSearch()">Clear</button>
+
+<input id="searchCustomer"
+placeholder="Search Customer"
+onkeyup="showDashboard()">
+
+<button class="clear-btn"
+onclick="clearSearch()">
+
+Clear
+
+</button>
+
 </div>
 
 <div class="menu">
-<button onclick="showSection('customerSection')">Customer</button>
-<button onclick="showSection('dueSection')">Due</button>
-<button onclick="showSection('paymentSection')">Payment</button>
-<button onclick="showSection('cashSection')">Nagad Sell</button>
-<button onclick="showSection('transactionSection')">Transactions</button>
-<button onclick="showSection('dueListSection')">Current Due</button>
-<button onclick="showSection('profileSection')">Profile</button>
+
+<button onclick="showSection('customerSection')">
+Customer
+</button>
+
+<button onclick="showSection('dueSection')">
+Due
+</button>
+
+<button onclick="showSection('paymentSection')">
+Payment
+</button>
+
+<button onclick="showSection('cashSection')">
+Nagad Sell
+</button>
+
+<button onclick="showSection('transactionSection')">
+Transactions
+</button>
+
+<button onclick="showSection('dueListSection')">
+Current Due
+</button>
+
+<button onclick="showSection('profileSection')">
+Profile
+</button>
+
 </div>
 
 <table id="dashboardTable"></table>
 
 </div>
-<div id="customerSection" class="card section">
+<div id="customerSection"
+class="card section">
 
 <h3>Customer Registration</h3>
 
-<input id="name" placeholder="Customer Name">
-<input id="phone" placeholder="Phone Number">
-<input id="area" placeholder="Area">
+<input id="name"
+placeholder="Customer Name">
 
-<button onclick="saveCustomer()">Save Customer</button>
-<button class="back-btn" onclick="goDashboard()">Back Dashboard</button>
+<input id="phone"
+placeholder="Phone Number">
+
+<input id="area"
+placeholder="Area">
+
+<button onclick="saveCustomer()">
+Save Customer
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
 
 </div>
 
-<div id="dueSection" class="card section">
+<div id="dueSection"
+class="card section">
 
 <h3>Due Entry</h3>
 
 <select id="customer"></select>
 
-<input id="product" placeholder="Product Name">
-<input id="qty" placeholder="Quantity">
-<input id="amount" placeholder="Amount">
+<input id="product"
+placeholder="Product Name">
+
+<input id="qty"
+placeholder="Quantity">
+
+<input id="amount"
+placeholder="Amount">
 
 <select id="dueAuthor">
-<option value="">Select Author</option>
+
+<option value="">
+Select Author
+</option>
+
 <option>Hashem</option>
 <option>Rozina</option>
 <option>Mohammad</option>
 <option>Hazrat</option>
+
 </select>
 
-<button onclick="saveDue()">Save Due</button>
-<button class="back-btn" onclick="goDashboard()">Back Dashboard</button>
+<button onclick="saveDue()">
+Save Due
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
 
 </div>
 
-<div id="paymentSection" class="card section">
+<div id="paymentSection"
+class="card section">
 
 <h3>Payment Entry</h3>
 
-<select id="payCustomer" onchange="showCurrentDue()"></select>
+<select id="payCustomer"
+onchange="showCurrentDue()">
+</select>
 
 <div class="current-due-box">
-Current Due: <span id="paymentDue">0</span> Tk
+
+Current Due :
+<span id="paymentDue">0</span> Tk
+
 </div>
 
-<input id="payAmount" placeholder="Payment Amount">
+<input id="payAmount"
+placeholder="Payment Amount">
 
 <select id="paymentAuthor">
-<option value="">Received By</option>
+
+<option value="">
+Received By
+</option>
+
 <option>Hashem</option>
 <option>Rozina</option>
 <option>Mohammad</option>
 <option>Hazrat</option>
+
 </select>
 
-<button onclick="savePayment()">Save Payment</button>
-<button class="back-btn" onclick="goDashboard()">Back Dashboard</button>
+<button onclick="savePayment()">
+Save Payment
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
 
 </div>
 
-<div id="cashSection" class="card section">
+<div id="cashSection"
+class="card section">
 
 <h3>Nagad Sell</h3>
 
-<input id="cashCustomer" placeholder="Customer Name">
-<input id="cashProduct" placeholder="Product Name">
-<input id="cashQty" placeholder="Quantity">
-<input id="cashAmount" placeholder="Amount">
+<input id="cashCustomer"
+placeholder="Customer Name">
+
+<input id="cashProduct"
+placeholder="Product Name">
+
+<input id="cashQty"
+placeholder="Quantity">
+
+<input id="cashAmount"
+placeholder="Amount">
 
 <select id="cashAuthor">
-<option value="">Select Author</option>
+
+<option value="">
+Select Author
+</option>
+
 <option>Hashem</option>
 <option>Rozina</option>
 <option>Mohammad</option>
 <option>Hazrat</option>
+
 </select>
 
-<button onclick="saveCashSell()">Save Nagad Sell</button>
-<button class="back-btn" onclick="goDashboard()">Back Dashboard</button>
+<button onclick="saveCashSell()">
+Save Nagad Sell
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
 
 <hr>
 
 <h3>Nagad Sell Report</h3>
 
 <div class="top-search">
-<input type="date" id="cashFilterDate" onchange="showCashSell()">
-<button class="clear-btn" onclick="clearCashSearch()">Clear</button>
+
+<input type="date"
+id="cashFilterDate"
+onchange="showCashSell()">
+
+<button class="clear-btn"
+onclick="clearCashSearch()">
+
+Clear
+
+</button>
+
 </div>
 
-<button class="print-btn" onclick="printCashSell()">Print A4</button>
+<button class="print-btn"
+onclick="printCashSell()">
+
+Print A4
+
+</button>
 
 <table id="cashTable"></table>
 
 </div>
-
-<div id="transactionSection" class="card section">
+<div id="transactionSection"
+class="card section">
 
 <h3>All Transactions</h3>
 
 <div class="top-search">
-<input type="date" id="filterDate" onchange="showTransactions()">
-<button class="clear-btn" onclick="clearTransactionSearch()">Clear</button>
+
+<input type="date"
+id="filterDate"
+onchange="showTransactions()">
+
+<button class="clear-btn"
+onclick="clearTransactionSearch()">
+
+Clear
+
+</button>
+
 </div>
 
-<button class="print-btn" onclick="printTransactions()">Print A4</button>
-<button class="back-btn" onclick="goDashboard()">Back Dashboard</button>
+<button class="print-btn"
+onclick="printTransactions()">
+
+Print A4
+
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
 
 <table id="transactionTable"></table>
 
 </div>
 
-<div id="dueListSection" class="card section">
+<div id="dueListSection"
+class="card section">
 
 <h3>All Current Due</h3>
 
-<button class="print-btn" onclick="printDueList()">Print A4</button>
-<button class="back-btn" onclick="goDashboard()">Back Dashboard</button>
+<button class="print-btn"
+onclick="printDueList()">
+
+Print A4
+
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
 
 <table id="dueTable"></table>
 
 </div>
 
-<div id="profileSection" class="card section">
+<div id="profileSection"
+class="card section">
 
 <h3>Customer Profile</h3>
 
-<input id="profileSearch" placeholder="Search By Name" onkeyup="showProfile()">
+<input id="profileSearch"
+placeholder="Search By Name"
+onkeyup="showProfile()">
 
-<button class="back-btn" onclick="goDashboard()">Back Dashboard</button>
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
 
 <div id="profileData"></div>
 
@@ -346,26 +545,49 @@ Current Due: <span id="paymentDue">0</span> Tk
 
 <script>
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbx41M1V677XdN0U3XbbFiUDbeVC5TRsfkiKqYZkp1T9TsBH8NXJKVRRAc9IlkPMdfxl/exec";
+const scriptURL =
+"https://script.google.com/macros/s/AKfycbx41M1V677XdN0U3XbbFiUDbeVC5TRsfkiKqYZkp1T9TsBH8NXJKVRRAc9IlkPMdfxl/exec";
 
-let customers = JSON.parse(localStorage.getItem('customers')) || [];
-let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-let cashSell = JSON.parse(localStorage.getItem('cashSell')) || [];
+let customers =
+JSON.parse(localStorage.getItem('customers')) || [];
+
+let transactions =
+JSON.parse(localStorage.getItem('transactions')) || [];
+
+let cashSell =
+JSON.parse(localStorage.getItem('cashSell')) || [];
+
+let editCustomerId = null;
 
 function saveData(){
 
-localStorage.setItem('customers',JSON.stringify(customers));
-localStorage.setItem('transactions',JSON.stringify(transactions));
-localStorage.setItem('cashSell',JSON.stringify(cashSell));
+localStorage.setItem(
+'customers',
+JSON.stringify(customers)
+);
+
+localStorage.setItem(
+'transactions',
+JSON.stringify(transactions)
+);
+
+localStorage.setItem(
+'cashSell',
+JSON.stringify(cashSell)
+);
 
 }
 
 function formatCustomerId(id){
+
 return String(id).padStart(3,'0');
+
 }
 
 function formatTransactionId(id){
+
 return String(id).padStart(2,'0');
+
 }
 
 function getOnlyDate(dateString){
@@ -373,8 +595,12 @@ function getOnlyDate(dateString){
 let d = new Date(dateString);
 
 let y = d.getFullYear();
-let m = String(d.getMonth()+1).padStart(2,'0');
-let da = String(d.getDate()).padStart(2,'0');
+
+let m =
+String(d.getMonth()+1).padStart(2,'0');
+
+let da =
+String(d.getDate()).padStart(2,'0');
 
 return `${y}-${m}-${da}`;
 
@@ -382,25 +608,36 @@ return `${y}-${m}-${da}`;
 
 function showSection(id){
 
-document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));
+document.querySelectorAll('.section')
+.forEach(sec=>sec.classList.remove('active'));
 
-document.getElementById(id).classList.add('active');
+document.getElementById(id)
+.classList.add('active');
 
-window.scrollTo({top:0,behavior:'smooth'});
+window.scrollTo({
+top:0,
+behavior:'smooth'
+});
 
 }
 
 function goDashboard(){
 
-document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));
+document.querySelectorAll('.section')
+.forEach(sec=>sec.classList.remove('active'));
 
-window.scrollTo({top:0,behavior:'smooth'});
+window.scrollTo({
+top:0,
+behavior:'smooth'
+});
 
 }
 
 function clearSearch(){
 
-document.getElementById('searchCustomer').value='';
+document.getElementById(
+'searchCustomer'
+).value='';
 
 showDashboard();
 
@@ -408,7 +645,9 @@ showDashboard();
 
 function clearTransactionSearch(){
 
-document.getElementById('filterDate').value='';
+document.getElementById(
+'filterDate'
+).value='';
 
 showTransactions();
 
@@ -416,103 +655,200 @@ showTransactions();
 
 function clearCashSearch(){
 
-document.getElementById('cashFilterDate').value='';
+document.getElementById(
+'cashFilterDate'
+).value='';
 
 showCashSell();
 
 }
+
 function getNextCustomerId(){
 
-if(customers.length===0)return 101;
+if(customers.length===0)
+return 101;
 
-return Math.max(...customers.map(c=>Number(c.id)))+1;
+return Math.max(
+...customers.map(c=>Number(c.id))
+)+1;
 
 }
 
 function getNextTransactionId(){
 
-let ids = transactions.map(t=>Number(t.id));
+let ids =
+transactions.map(t=>Number(t.id));
 
 let id = 1;
 
 while(ids.includes(id)){
+
 id++;
+
 }
 
 return id;
 
 }
+function loadDropdown(){
+
+let customer =
+document.getElementById('customer');
+
+let payCustomer =
+document.getElementById('payCustomer');
+
+customer.innerHTML =
+"<option value=''>Select Customer</option>";
+
+payCustomer.innerHTML =
+"<option value=''>Select Customer</option>";
+
+customers.forEach(c=>{
+
+customer.innerHTML += `
+
+<option value="${c.id}">
+${formatCustomerId(c.id)} - ${c.name}
+</option>
+
+`;
+
+payCustomer.innerHTML += `
+
+<option value="${c.id}">
+${formatCustomerId(c.id)} - ${c.name}
+</option>
+
+`;
+
+});
+
+}
+
+function editCustomer(id){
+
+let customer =
+customers.find(c=>c.id==id);
+
+document.getElementById('name').value =
+customer.name;
+
+document.getElementById('phone').value =
+customer.phone;
+
+document.getElementById('area').value =
+customer.area;
+
+editCustomerId = id;
+
+showSection('customerSection');
+
+}
 
 function saveCustomer(){
 
-let name=document.getElementById('name').value.trim();
-let phone=document.getElementById('phone').value.trim();
-let area=document.getElementById('area').value.trim();
+let name =
+document.getElementById('name').value.trim();
+
+let phone =
+document.getElementById('phone').value.trim();
+
+let area =
+document.getElementById('area').value.trim();
 
 if(!name){
+
 alert('Customer Name Required');
+
 return;
+
 }
 
+if(editCustomerId){
+
+let oldCustomer =
+customers.find(c=>c.id==editCustomerId);
+
+oldCustomer.name = name;
+oldCustomer.phone = phone;
+oldCustomer.area = area;
+
+transactions.forEach(t=>{
+
+if(t.customerId==editCustomerId){
+
+t.customerName = name;
+
+}
+
+});
+
+editCustomerId = null;
+
+}else{
+
 let customer={
+
 id:getNextCustomerId(),
 name,
 phone,
 area,
 due:0,
 registerDate:new Date().toLocaleString()
+
 };
 
 customers.push(customer);
+
+}
 
 saveData();
 
 loadDropdown();
 
 showDashboard();
+
+showProfile();
+
 showDueList();
+
 updateTotalDue();
 
-fetch(scriptURL,{
-method:'POST',
-body:JSON.stringify({action:'saveCustomer',...customer})
-});
-
 document.getElementById('name').value='';
+
 document.getElementById('phone').value='';
+
 document.getElementById('area').value='';
 
-alert('Customer Saved');
-
-}
-
-function loadDropdown(){
-
-let customer=document.getElementById('customer');
-let payCustomer=document.getElementById('payCustomer');
-
-customer.innerHTML="<option value=''>Select Customer</option>";
-payCustomer.innerHTML="<option value=''>Select Customer</option>";
-
-customers.forEach(c=>{
-
-customer.innerHTML += `<option value="${c.id}">${formatCustomerId(c.id)} - ${c.name}</option>`;
-
-payCustomer.innerHTML += `<option value="${c.id}">${formatCustomerId(c.id)} - ${c.name}</option>`;
-
-});
+alert('Customer Saved Successfully');
 
 }
 
 function saveDue(){
 
-let customerId=document.getElementById('customer').value;
-let product=document.getElementById('product').value.trim();
-let qty=document.getElementById('qty').value.trim();
-let amount=document.getElementById('amount').value.trim();
-let author=document.getElementById('dueAuthor').value;
+let customerId =
+document.getElementById('customer').value;
 
-if(!customerId || !product || !qty || !amount || !author){
+let product =
+document.getElementById('product').value.trim();
+
+let qty =
+document.getElementById('qty').value.trim();
+
+let amount =
+document.getElementById('amount').value.trim();
+
+let author =
+document.getElementById('dueAuthor').value;
+
+if(
+!customerId ||
+!product ||
+!qty ||
+!amount ||
+!author
+){
 
 alert('Fill All Fields');
 
@@ -520,20 +856,29 @@ return;
 
 }
 
-let customer=customers.find(c=>c.id==customerId);
+let customer =
+customers.find(c=>c.id==customerId);
 
 customer.due += Number(amount);
 
 let transaction={
 
 id:getNextTransactionId(),
+
 customerId,
+
 customerName:customer.name,
+
 type:'Due',
+
 product,
+
 qty,
+
 amount,
+
 author,
+
 date:new Date().toLocaleString()
 
 };
@@ -542,20 +887,24 @@ transactions.push(transaction);
 
 saveData();
 
-showDashboard();
 showTransactions();
+
 showDueList();
+
+showProfile();
+
+showDashboard();
+
 updateTotalDue();
+
 updateDailySummary();
 
-fetch(scriptURL,{
-method:'POST',
-body:JSON.stringify({action:'saveTransaction',...transaction})
-});
-
 document.getElementById('product').value='';
+
 document.getElementById('qty').value='';
+
 document.getElementById('amount').value='';
+
 document.getElementById('dueAuthor').value='';
 
 alert('Due Added');
@@ -564,19 +913,35 @@ alert('Due Added');
 
 function showCurrentDue(){
 
-let customerId=document.getElementById('payCustomer').value;
+let customerId =
+document.getElementById('payCustomer').value;
 
-let customer=customers.find(c=>c.id==customerId);
+let customer =
+customers.find(c=>c.id==customerId);
 
-document.getElementById('paymentDue').innerText = customer ? customer.due : 0;
+if(customer){
+
+document.getElementById('paymentDue')
+.innerText = customer.due;
+
+}else{
+
+document.getElementById('paymentDue')
+.innerText = 0;
 
 }
 
+}
 function savePayment(){
 
-let customerId=document.getElementById('payCustomer').value;
-let amount=document.getElementById('payAmount').value.trim();
-let author=document.getElementById('paymentAuthor').value;
+let customerId =
+document.getElementById('payCustomer').value;
+
+let amount =
+document.getElementById('payAmount').value.trim();
+
+let author =
+document.getElementById('paymentAuthor').value;
 
 if(!customerId || !amount || !author){
 
@@ -586,20 +951,29 @@ return;
 
 }
 
-let customer=customers.find(c=>c.id==customerId);
+let customer =
+customers.find(c=>c.id==customerId);
 
 customer.due -= Number(amount);
 
 let transaction={
 
 id:getNextTransactionId(),
+
 customerId,
+
 customerName:customer.name,
+
 type:'Payment',
+
 product:'-',
+
 qty:'-',
+
 amount,
+
 author,
+
 date:new Date().toLocaleString()
 
 };
@@ -609,16 +983,19 @@ transactions.push(transaction);
 saveData();
 
 showDashboard();
+
 showTransactions();
+
 showDueList();
+
+showProfile();
+
 updateTotalDue();
 
-fetch(scriptURL,{
-method:'POST',
-body:JSON.stringify({action:'saveTransaction',...transaction})
-});
+updateDailySummary();
 
 document.getElementById('payAmount').value='';
+
 document.getElementById('paymentAuthor').value='';
 
 alert('Payment Saved');
@@ -627,11 +1004,25 @@ alert('Payment Saved');
 
 function saveCashSell(){
 
-let customer=document.getElementById('cashCustomer').value.trim();
-let product=document.getElementById('cashProduct').value.trim();
-let qty=document.getElementById('cashQty').value.trim();
-let amount=document.getElementById('cashAmount').value.trim();
-let author=document.getElementById('cashAuthor').value;
+let customer =
+document.getElementById('cashCustomer')
+.value.trim();
+
+let product =
+document.getElementById('cashProduct')
+.value.trim();
+
+let qty =
+document.getElementById('cashQty')
+.value.trim();
+
+let amount =
+document.getElementById('cashAmount')
+.value.trim();
+
+let author =
+document.getElementById('cashAuthor')
+.value;
 
 if(!product || !qty || !amount || !author){
 
@@ -644,11 +1035,17 @@ return;
 let sell={
 
 id:Date.now(),
+
 customer,
+
 product,
+
 qty,
+
 amount,
+
 author,
+
 date:new Date().toLocaleString()
 
 };
@@ -657,125 +1054,206 @@ cashSell.push(sell);
 
 saveData();
 
+showCashSell();
+
 updateDailySummary();
 
-fetch(scriptURL,{
-method:'POST',
-body:JSON.stringify({action:'saveCashSell',...sell})
-});
-
 document.getElementById('cashCustomer').value='';
-document.getElementById('cashProduct').value='';
-document.getElementById('cashQty').value='';
-document.getElementById('cashAmount').value='';
-document.getElementById('cashAuthor').value='';
 
-showCashSell();
+document.getElementById('cashProduct').value='';
+
+document.getElementById('cashQty').value='';
+
+document.getElementById('cashAmount').value='';
+
+document.getElementById('cashAuthor').value='';
 
 alert('Nagad Sell Saved');
 
 }
 
+function updateTotalDue(){
+
+let total = 0;
+
+customers.forEach(c=>{
+
+total += Number(c.due);
+
+});
+
+document.getElementById('totalDue')
+.innerText = total;
+
+}
+
+function updateDailySummary(){
+
+let now = new Date();
+
+document.getElementById('todayDate')
+.innerText = now.toLocaleString();
+
+let dueSell = 0;
+
+transactions.forEach(t=>{
+
+if(t.type==='Due'){
+
+dueSell += Number(t.amount);
+
+}
+
+});
+
+let nagad = 0;
+
+cashSell.forEach(c=>{
+
+nagad += Number(c.amount);
+
+});
+
+let total = dueSell + nagad;
+
+document.getElementById('dueSell')
+.innerText = dueSell;
+
+document.getElementById('nagadSell')
+.innerText = nagad;
+
+document.getElementById('totalSell')
+.innerText = total;
+
+}
+
+setInterval(updateDailySummary,1000);
+
 function showDashboard(){
 
-let s=document.getElementById('searchCustomer').value.toLowerCase();
+let s =
+document.getElementById('searchCustomer')
+.value.toLowerCase();
 
-let table=document.getElementById('dashboardTable');
+let table =
+document.getElementById('dashboardTable');
 
-table.innerHTML=`
+table.innerHTML = `
+
 <tr>
+
 <th>ID</th>
 <th>Name</th>
 <th>Phone</th>
 <th>Area</th>
 <th>Due</th>
 <th>Action</th>
-</tr>`;
+
+</tr>
+
+`;
 
 customers.forEach(c=>{
 
-if(c.name.toLowerCase().includes(s) || c.phone.includes(s)){
+if(
+c.name.toLowerCase().includes(s)
+||
+c.phone.includes(s)
+){
 
 table.innerHTML += `
+
 <tr>
+
 <td>${formatCustomerId(c.id)}</td>
+
 <td>${c.name}</td>
+
 <td>${c.phone}</td>
+
 <td>${c.area}</td>
-<td>${c.due}</td>
-<td>
-<div class="action-btn">
-<button class="edit-btn">Edit</button>
-<button class="save-btn">Save</button>
-<button class="delete-btn" onclick="deleteCustomer('${c.id}')">Delete</button>
-</div>
+
+<td style="color:red;font-weight:bold;">
+
+${c.due}
+
 </td>
-</tr>`;
+
+<td>
+
+<div class="action-btn">
+
+<button class="edit-btn"
+onclick="editCustomer('${c.id}')">
+
+Edit
+
+</button>
+
+<button class="delete-btn"
+onclick="deleteCustomer('${c.id}')">
+
+Delete
+
+</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
 
 }
 
 });
 
 }
+function deleteCustomer(id){
 
-function showTransactions(){
+if(confirm('Delete Customer?')){
 
-let table=document.getElementById('transactionTable');
+customers =
+customers.filter(c=>c.id!=id);
 
-let date=document.getElementById('filterDate').value;
+transactions =
+transactions.filter(t=>t.customerId!=id);
 
-table.innerHTML=`
-<tr>
-<th>ID</th>
-<th>Customer</th>
-<th>Type</th>
-<th>Product</th>
-<th>Qty</th>
-<th>Amount</th>
-<th>Author</th>
-<th>Date</th>
-<th>Action</th>
-</tr>`;
+saveData();
 
-transactions.forEach(t=>{
+loadDropdown();
 
-let rowDate = getOnlyDate(t.date);
+showDashboard();
 
-if(date==='' || rowDate===date){
+showTransactions();
 
-table.innerHTML += `
-<tr>
-<td>${formatTransactionId(t.id)}</td>
-<td>${t.customerName}</td>
-<td>${t.type}</td>
-<td>${t.product}</td>
-<td>${t.qty}</td>
-<td>${t.amount}</td>
-<td>${t.author || '-'}</td>
-<td>${t.date}</td>
-<td>
-<div class="action-btn">
-<button class="edit-btn">Edit</button>
-<button class="save-btn">Save</button>
-<button class="delete-btn" onclick="deleteTransaction('${t.id}')">Delete</button>
-</div>
-</td>
-</tr>`;
+showDueList();
+
+showProfile();
+
+updateTotalDue();
+
+updateDailySummary();
+
+alert('Deleted Successfully');
 
 }
-
-});
 
 }
 
 function showCashSell(){
 
-let table=document.getElementById('cashTable');
+let table =
+document.getElementById('cashTable');
 
-let date=document.getElementById('cashFilterDate').value;
+let date =
+document.getElementById('cashFilterDate').value;
 
-table.innerHTML=`
+table.innerHTML = `
+
 <tr>
+
 <th>ID</th>
 <th>Customer</th>
 <th>Product</th>
@@ -784,9 +1262,12 @@ table.innerHTML=`
 <th>Author</th>
 <th>Date</th>
 <th>Action</th>
-</tr>`;
 
-let total=0;
+</tr>
+
+`;
+
+let total = 0;
 
 cashSell.forEach(c=>{
 
@@ -797,23 +1278,42 @@ if(date==='' || rowDate===date){
 total += Number(c.amount);
 
 table.innerHTML += `
+
 <tr>
+
 <td>${c.id}</td>
-<td contenteditable='true'>${c.customer}</td>
-<td contenteditable='true'>${c.product}</td>
-<td contenteditable='true'>${c.qty}</td>
-<td contenteditable='true'>${c.amount}</td>
+
+<td contenteditable="false">
+${c.customer}
+</td>
+
+<td contenteditable="false">
+${c.product}
+</td>
+
+<td contenteditable="false">
+${c.qty}
+</td>
+
+<td contenteditable="false">
+${c.amount}
+</td>
+
 <td>${c.author}</td>
+
 <td>${c.date}</td>
 
 <td>
+
 <div class="action-btn">
 
-<button class="edit-btn">
+<button class="edit-btn"
+onclick="enableCashEdit(this)">
 Edit
 </button>
 
-<button class="save-btn">
+<button class="save-btn"
+onclick="saveCashEdit('${c.id}',this)">
 Save
 </button>
 
@@ -823,30 +1323,324 @@ Delete
 </button>
 
 </div>
+
 </td>
 
-</tr>`;
+</tr>
+
+`;
 
 }
 
 });
 
 table.innerHTML += `
+
 <tr>
-<th colspan="4">Total</th>
+
+<th colspan="4">
+Total
+</th>
+
 <th>${total}</th>
+
 <th colspan="3"></th>
-</tr>`;
+
+</tr>
+
+`;
 
 }
 
+function enableCashEdit(btn){
+
+let row =
+btn.parentElement.parentElement.parentElement;
+
+let cells = row.querySelectorAll('td');
+
+for(let i=1;i<=4;i++){
+
+cells[i].contentEditable = true;
+
+cells[i].style.background='#fff3cd';
+
+}
+
+}
+
+function saveCashEdit(id,btn){
+
+let row =
+btn.parentElement.parentElement.parentElement;
+
+let cells = row.querySelectorAll('td');
+
+let item =
+cashSell.find(c=>c.id==id);
+
+item.customer = cells[1].innerText;
+
+item.product = cells[2].innerText;
+
+item.qty = cells[3].innerText;
+
+item.amount = cells[4].innerText;
+
+saveData();
+
+showCashSell();
+
+updateDailySummary();
+
+alert('Cash Sell Updated');
+
+}
+
+function deleteCashSell(id){
+
+if(confirm('Delete Cash Sell?')){
+
+cashSell =
+cashSell.filter(c=>c.id!=id);
+
+saveData();
+
+showCashSell();
+
+updateDailySummary();
+
+alert('Deleted Successfully');
+
+}
+
+}
+function showTransactions(){
+
+let table =
+document.getElementById('transactionTable');
+
+let date =
+document.getElementById('filterDate').value;
+
+table.innerHTML = `
+
+<tr>
+
+<th>ID</th>
+<th>Customer</th>
+<th>Type</th>
+<th>Product</th>
+<th>Qty</th>
+<th>Amount</th>
+<th>Author</th>
+<th>Date</th>
+<th>Action</th>
+
+</tr>
+
+`;
+
+transactions.forEach(t=>{
+
+let rowDate = getOnlyDate(t.date);
+
+if(date==='' || rowDate===date){
+
+table.innerHTML += `
+
+<tr>
+
+<td>${formatTransactionId(t.id)}</td>
+
+<td>${t.customerName}</td>
+
+<td>${t.type}</td>
+
+<td contenteditable="false">
+${t.product}
+</td>
+
+<td contenteditable="false">
+${t.qty}
+</td>
+
+<td contenteditable="false">
+${t.amount}
+</td>
+
+<td>${t.author}</td>
+
+<td>${t.date}</td>
+
+<td>
+
+<div class="action-btn">
+
+<button class="edit-btn"
+onclick="enableTransactionEdit(this)">
+Edit
+</button>
+
+<button class="save-btn"
+onclick="saveTransactionEdit('${t.id}',this)">
+Save
+</button>
+
+<button class="delete-btn"
+onclick="deleteTransaction('${t.id}')">
+Delete
+</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+}
+
+});
+
+}
+
+function enableTransactionEdit(btn){
+
+let row =
+btn.parentElement.parentElement.parentElement;
+
+let cells = row.querySelectorAll('td');
+
+for(let i=3;i<=5;i++){
+
+cells[i].contentEditable = true;
+
+cells[i].style.background='#fff3cd';
+
+}
+
+}
+
+function saveTransactionEdit(id,btn){
+
+let row =
+btn.parentElement.parentElement.parentElement;
+
+let cells = row.querySelectorAll('td');
+
+let item =
+transactions.find(t=>t.id==id);
+
+item.product = cells[3].innerText;
+
+item.qty = cells[4].innerText;
+
+item.amount = cells[5].innerText;
+
+saveData();
+
+showTransactions();
+
+updateDailySummary();
+
+alert('Transaction Updated');
+
+}
+
+function deleteTransaction(id){
+
+if(confirm('Delete Transaction?')){
+
+transactions =
+transactions.filter(t=>t.id!=id);
+
+saveData();
+
+showTransactions();
+
+showProfile();
+
+updateDailySummary();
+
+alert('Deleted Successfully');
+
+}
+
+}
+
+function showDueList(){
+
+let table =
+document.getElementById('dueTable');
+
+let total = 0;
+
+table.innerHTML = `
+
+<tr>
+
+<th>ID</th>
+<th>Name</th>
+<th>Phone</th>
+<th>Current Due</th>
+
+</tr>
+
+`;
+
+customers.forEach(c=>{
+
+total += Number(c.due);
+
+table.innerHTML += `
+
+<tr>
+
+<td>${formatCustomerId(c.id)}</td>
+
+<td>${c.name}</td>
+
+<td>${c.phone}</td>
+
+<td style="color:red;font-weight:bold;">
+${c.due}
+</td>
+
+</tr>
+
+`;
+
+});
+
+table.innerHTML += `
+
+<tr>
+
+<th colspan="3">
+Grand Total
+</th>
+
+<th>
+${total}
+</th>
+
+</tr>
+
+`;
+
+}
 function showProfile(){
 
-let s=document.getElementById('profileSearch').value.toLowerCase();
+let s =
+document.getElementById('profileSearch')
+.value.toLowerCase();
 
-let div=document.getElementById('profileData');
+let div =
+document.getElementById('profileData');
 
-let html='';
+let html = '';
 
 customers.forEach(c=>{
 
@@ -854,46 +1648,73 @@ if(c.name.toLowerCase().includes(s)){
 
 html += `
 
-<div class='card'>
+<div class="card">
 
-<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;'>
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:10px;
+">
 
 <div>
 
 <h3>${c.name}</h3>
 
-<p><b>Customer ID:</b> ${formatCustomerId(c.id)}</p>
+<p>
+<b>Customer ID :</b>
+${formatCustomerId(c.id)}
+</p>
 
-<p><b>Phone:</b> ${c.phone}</p>
+<p>
+<b>Phone :</b>
+${c.phone}
+</p>
 
-<p><b>Area:</b> ${c.area}</p>
+<p>
+<b>Area :</b>
+${c.area}
+</p>
 
-<p><b>Current Due:</b> ${c.due}</p>
+<p style="color:red;font-weight:bold;">
+<b>Current Due :</b>
+${c.due}
+</p>
 
 </div>
 
-<div class='action-btn'>
+<div class="action-btn">
 
-<button class='edit-btn'>
-Update
+<button class="edit-btn"
+onclick="editCustomer('${c.id}')">
+
+Edit
+
 </button>
 
-<button class='save-btn'>
-Save
-</button>
-
-<button class='delete-btn'
+<button class="delete-btn"
 onclick="deleteCustomer('${c.id}')">
+
 Delete
+
 </button>
 
 </div>
 
 </div>
+
+<button class="print-btn"
+onclick="printProfile('${c.id}')">
+
+Print A5
+
+</button>
 
 <table>
 
 <tr>
+
 <th>ID</th>
 <th>Type</th>
 <th>Product</th>
@@ -901,6 +1722,7 @@ Delete
 <th>Amount</th>
 <th>Date</th>
 <th>Action</th>
+
 </tr>
 
 `;
@@ -927,19 +1749,13 @@ html += `
 
 <td>
 
-<div class='action-btn'>
+<div class="action-btn">
 
-<button class='edit-btn'>
-Edit
-</button>
-
-<button class='save-btn'>
-Save
-</button>
-
-<button class='delete-btn'
+<button class="delete-btn"
 onclick="deleteTransaction('${t.id}')">
+
 Delete
+
 </button>
 
 </div>
@@ -955,178 +1771,196 @@ Delete
 });
 
 html += `
+
 </table>
+
 </div>
+
 `;
 
 }
 
 });
 
-div.innerHTML=html;
+div.innerHTML = html;
 
 }
 
-function showDueList(){
+function printProfile(id){
 
-let table=document.getElementById('dueTable');
+let customer =
+customers.find(c=>c.id==id);
 
-let total=0;
+let w = window.open();
 
-table.innerHTML=`
+let d = new Date().toLocaleString();
+
+let html = `
+
+<h2 style="text-align:center;">
+Mohammod Ali Store
+</h2>
+
+<h3 style="text-align:center;">
+Customer Profile
+</h3>
+
+<p style="text-align:center;">
+Print Date & Time : ${d}
+</p>
+
+<p><b>Name :</b> ${customer.name}</p>
+
+<p><b>Customer ID :</b>
+${formatCustomerId(customer.id)}
+</p>
+
+<p><b>Phone :</b> ${customer.phone}</p>
+
+<p><b>Area :</b> ${customer.area}</p>
+
+<p><b>Current Due :</b> ${customer.due}</p>
+
+<table border="1"
+width="100%"
+style="border-collapse:collapse;">
+
 <tr>
+
 <th>ID</th>
-<th>Name</th>
-<th>Phone</th>
-<th>Current Due</th>
-</tr>`;
+<th>Type</th>
+<th>Product</th>
+<th>Qty</th>
+<th>Amount</th>
+<th>Date</th>
 
-customers.forEach(c=>{
+</tr>
 
-total += Number(c.due);
-
-table.innerHTML += `
-<tr>
-<td>${formatCustomerId(c.id)}</td>
-<td>${c.name}</td>
-<td>${c.phone}</td>
-<td>${c.due}</td>
-</tr>`;
-
-});
-
-table.innerHTML += `
-<tr>
-<th colspan="3">Grand Total</th>
-<th>${total}</th>
-</tr>`;
-
-}
-
-function updateTotalDue(){
-
-let total=0;
-
-customers.forEach(c=>{
-total += Number(c.due);
-});
-
-document.getElementById('totalDue').innerText=total;
-
-}
-
-function updateDailySummary(){
-
-let today=new Date().toLocaleDateString();
-
-document.getElementById('todayDate').innerText=today;
-
-let dueSell=0;
+`;
 
 transactions.forEach(t=>{
-if(t.type==='Due'){
-dueSell += Number(t.amount);
+
+if(t.customerId==id){
+
+html += `
+
+<tr>
+
+<td>${formatTransactionId(t.id)}</td>
+
+<td>${t.type}</td>
+
+<td>${t.product}</td>
+
+<td>${t.qty}</td>
+
+<td>${t.amount}</td>
+
+<td>${t.date}</td>
+
+</tr>
+
+`;
+
 }
+
 });
 
-let nagad=0;
+html += `
 
-cashSell.forEach(c=>{
-nagad += Number(c.amount);
-});
-
-let total = dueSell + nagad;
-
-document.getElementById('dueSell').innerText=dueSell;
-document.getElementById('nagadSell').innerText=nagad;
-document.getElementById('totalSell').innerText=total;
-
-}
-
-function deleteTransaction(id){
-function deleteCashSell(id){
-
-if(confirm('Delete Cash Sell?')){
-
-cashSell = cashSell.filter(c=>c.id!=id);
-
-saveData();
-
-showCashSell();
-
-updateDailySummary();
-
-}
-
-}
-
-if(confirm('Delete Transaction?')){
-
-transactions = transactions.filter(t=>t.id!=id);
-
-saveData();
-
-showTransactions();
-showCashSell();
-
-}
-
-}
-
-function deleteCustomer(id){
-
-if(confirm('Delete Customer?')){
-
-customers = customers.filter(c=>c.id!=id);
-
-transactions = transactions.filter(t=>t.customerId!=id);
-
-saveData();
-
-loadDropdown();
-
-showDashboard();
-showTransactions();
-showDueList();
-
-updateTotalDue();
-
-}
-
-}
-
-function printTransactions(){
-
-let table=document.getElementById('transactionTable').cloneNode(true);
-
-table.querySelectorAll('tr').forEach(row=>{
-if(row.cells.length>8){
-row.deleteCell(8);
-}
-});
-
-let w=window.open();
-
-let d=new Date().toLocaleString();
-
-w.document.write(`
-<h2 style='text-align:center;'>Mohammod Ali Store</h2>
-<h3 style='text-align:center;'>Transaction Report</h3>
-<p style='text-align:center;'>Print Date & Time: ${d}</p>
-
-${table.outerHTML}
+</table>
 
 <style>
-@page{size:A4;}
-body{font-family:Arial;}
-table{width:100%;border-collapse:collapse;}
+
+@page{
+size:A5;
+}
+
+body{
+font-family:Arial;
+padding:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
 th,td{
 border:1px solid black;
 padding:8px;
 text-align:center;
-vertical-align:middle;
 }
+
 </style>
+
+`;
+
+w.document.write(html);
+
+w.print();
+
+}
+function printTransactions(){
+
+let table =
+document.getElementById('transactionTable')
+.cloneNode(true);
+
+table.querySelectorAll('tr').forEach(row=>{
+
+if(row.cells.length>8){
+
+row.deleteCell(8);
+
+}
+
+});
+
+let w = window.open();
+
+let d = new Date().toLocaleString();
+
+w.document.write(`
+
+<h2 style="text-align:center;">
+Mohammod Ali Store
+</h2>
+
+<h3 style="text-align:center;">
+Transaction Report
+</h3>
+
+<p style="text-align:center;">
+Print Date & Time : ${d}
+</p>
+
+${table.outerHTML}
+
+<style>
+
+@page{
+size:A4;
+}
+
+body{
+font-family:Arial;
+padding:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid black;
+padding:8px;
+text-align:center;
+}
+
+</style>
+
 `);
 
 w.print();
@@ -1135,28 +1969,64 @@ w.print();
 
 function printCashSell(){
 
-let w=window.open();
+let table =
+document.getElementById('cashTable')
+.cloneNode(true);
 
-let d=new Date().toLocaleString();
+table.querySelectorAll('tr').forEach(row=>{
+
+if(row.cells.length>7){
+
+row.deleteCell(7);
+
+}
+
+});
+
+let w = window.open();
+
+let d = new Date().toLocaleString();
 
 w.document.write(`
-<h2 style='text-align:center;'>Mohammod Ali Store</h2>
-<h3 style='text-align:center;'>Nagad Sell Report</h3>
-<p style='text-align:center;'>Print Date & Time: ${d}</p>
 
-${document.getElementById('cashTable').outerHTML}
+<h2 style="text-align:center;">
+Mohammod Ali Store
+</h2>
+
+<h3 style="text-align:center;">
+Nagad Sell Report
+</h3>
+
+<p style="text-align:center;">
+Print Date & Time : ${d}
+</p>
+
+${table.outerHTML}
 
 <style>
-@page{size:A4;}
-body{font-family:Arial;}
-table{width:100%;border-collapse:collapse;}
+
+@page{
+size:A4;
+}
+
+body{
+font-family:Arial;
+padding:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
 th,td{
 border:1px solid black;
 padding:8px;
 text-align:center;
-vertical-align:middle;
 }
+
 </style>
+
 `);
 
 w.print();
@@ -1165,28 +2035,50 @@ w.print();
 
 function printDueList(){
 
-let w=window.open();
+let w = window.open();
 
-let d=new Date().toLocaleString();
+let d = new Date().toLocaleString();
 
 w.document.write(`
-<h2 style='text-align:center;'>Mohammod Ali Store</h2>
-<h3 style='text-align:center;'>Current Due Report</h3>
-<p style='text-align:center;'>Print Date & Time: ${d}</p>
+
+<h2 style="text-align:center;">
+Mohammod Ali Store
+</h2>
+
+<h3 style="text-align:center;">
+Current Due Report
+</h3>
+
+<p style="text-align:center;">
+Print Date & Time : ${d}
+</p>
 
 ${document.getElementById('dueTable').outerHTML}
 
 <style>
-@page{size:A4;}
-body{font-family:Arial;}
-table{width:100%;border-collapse:collapse;}
+
+@page{
+size:A4;
+}
+
+body{
+font-family:Arial;
+padding:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
 th,td{
 border:1px solid black;
 padding:8px;
 text-align:center;
-vertical-align:middle;
 }
+
 </style>
+
 `);
 
 w.print();
@@ -1196,11 +2088,17 @@ w.print();
 loadDropdown();
 
 showDashboard();
+
 showTransactions();
+
 showCashSell();
+
 showDueList();
 
+showProfile();
+
 updateTotalDue();
+
 updateDailySummary();
 
 </script>
