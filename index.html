@@ -177,6 +177,22 @@ margin-bottom:10px;
 <body>
 
 <div class="card">
+<div class="card">
+
+<marquee behavior="alternate"
+direction="left"
+scrollamount="10"
+style="
+font-size:28px;
+font-weight:bold;
+color:green;
+margin-bottom:15px;
+text-shadow:2px 2px 5px yellow;
+">
+
+ Mohammod Ali Store 
+
+</marquee>
 
 <h2>Dashboard</h2>
 
@@ -545,8 +561,7 @@ Back Dashboard
 
 <script>
 
-const scriptURL =
-"https://script.google.com/macros/s/AKfycbx41M1V677XdN0U3XbbFiUDbeVC5TRsfkiKqYZkp1T9TsBH8NXJKVRRAc9IlkPMdfxl/exec";
+const scriptURL ="https://script.google.com/macros/s/AKfycbx41M1V677XdN0U3XbbFiUDbeVC5TRsfkiKqYZkp1T9TsBH8NXJKVRRAc9IlkPMdfxl/exec";
 
 let customers =
 JSON.parse(localStorage.getItem('customers')) || [];
@@ -804,6 +819,30 @@ customers.push(customer);
 }
 
 saveData();
+let currentCustomerId;
+
+if(editCustomerId){
+
+currentCustomerId = editCustomerId;
+
+}else{
+
+currentCustomerId =
+customers[customers.length-1].id;
+
+}
+fetch(scriptURL,{
+method:'POST',
+body:JSON.stringify({
+action:'saveCustomer',
+id:String(currentCustomerId).padStart(3,'0'),
+name,
+phone,
+area,
+due:0,
+registerDate:new Date().toLocaleString()
+})
+});
 
 loadDropdown();
 
@@ -885,7 +924,32 @@ date:new Date().toLocaleString()
 
 transactions.push(transaction);
 
-saveData();
+fetch(scriptURL,{
+method:'POST',
+body:JSON.stringify({
+
+action:'saveTransaction',
+
+id:String(transaction.id).padStart(2,'0'),
+
+customerId:String(customer.id).padStart(3,'0'),
+
+customerName:customer.name,
+
+type:transaction.type,
+
+product:transaction.product,
+
+qty:transaction.qty,
+
+amount:transaction.amount,
+
+author:transaction.author,
+
+date:transaction.date
+
+})
+});
 
 showTransactions();
 
@@ -960,7 +1024,7 @@ let transaction={
 
 id:getNextTransactionId(),
 
-customerId,
+customerId:String(customer.id).padStart(3,'0'),
 
 customerName:customer.name,
 
@@ -981,6 +1045,33 @@ date:new Date().toLocaleString()
 transactions.push(transaction);
 
 saveData();
+
+fetch(scriptURL,{
+method:'POST',
+body:JSON.stringify({
+
+action:'saveTransaction',
+
+id:String(transaction.id).padStart(2,'0'),
+
+customerId:transaction.customerId,
+
+customerName:transaction.customerName,
+
+type:transaction.type,
+
+product:transaction.product,
+
+qty:transaction.qty,
+
+amount:transaction.amount,
+
+author:transaction.author,
+
+date:transaction.date
+
+})
+});
 
 showDashboard();
 
@@ -1005,24 +1096,19 @@ alert('Payment Saved');
 function saveCashSell(){
 
 let customer =
-document.getElementById('cashCustomer')
-.value.trim();
+document.getElementById('cashCustomer').value.trim();
 
 let product =
-document.getElementById('cashProduct')
-.value.trim();
+document.getElementById('cashProduct').value.trim();
 
 let qty =
-document.getElementById('cashQty')
-.value.trim();
+document.getElementById('cashQty').value.trim();
 
 let amount =
-document.getElementById('cashAmount')
-.value.trim();
+document.getElementById('cashAmount').value.trim();
 
 let author =
-document.getElementById('cashAuthor')
-.value;
+document.getElementById('cashAuthor').value;
 
 if(!product || !qty || !amount || !author){
 
@@ -1032,9 +1118,11 @@ return;
 
 }
 
+let now = new Date();
+
 let sell={
 
-id:Date.now(),
+id:String(cashSell.length + 1).padStart(2,'0'),
 
 customer,
 
@@ -1054,6 +1142,23 @@ cashSell.push(sell);
 
 saveData();
 
+fetch(scriptURL,{
+method:'POST',
+body:JSON.stringify({
+action:'saveCashSell',
+id:sell.id,
+customer:sell.customer,
+product:sell.product,
+qty:sell.qty,
+amount:sell.amount,
+author:sell.author,
+date:sell.date
+}),
+mode:'no-cors'
+})
+.then(res=>res.text())
+.then(data=>console.log(data))
+.catch(err=>console.log(err));
 showCashSell();
 
 updateDailySummary();
