@@ -563,33 +563,15 @@ Back Dashboard
 
 const scriptURL ="https://script.google.com/macros/s/AKfycbx41M1V677XdN0U3XbbFiUDbeVC5TRsfkiKqYZkp1T9TsBH8NXJKVRRAc9IlkPMdfxl/exec";
 
-let customers =
-JSON.parse(localStorage.getItem('customers')) || [];
+let customers = [];
 
-let transactions =
-JSON.parse(localStorage.getItem('transactions')) || [];
+let transactions = [];
 
-let cashSell =
-JSON.parse(localStorage.getItem('cashSell')) || [];
+let cashSell = [];
 
 let editCustomerId = null;
 
 function saveData(){
-
-localStorage.setItem(
-'customers',
-JSON.stringify(customers)
-);
-
-localStorage.setItem(
-'transactions',
-JSON.stringify(transactions)
-);
-
-localStorage.setItem(
-'cashSell',
-JSON.stringify(cashSell)
-);
 
 }
 
@@ -2205,7 +2187,115 @@ showProfile();
 updateTotalDue();
 
 updateDailySummary();
+function loadOnlineData(){
 
+fetch(scriptURL)
+
+.then(res=>res.json())
+
+.then(data=>{
+
+customers = [];
+
+transactions = [];
+
+cashSell = [];
+
+for(let i=1;i<data.customers.length;i++){
+
+let r = data.customers[i];
+
+customers.push({
+
+id:r[0],
+
+name:r[1],
+
+phone:r[2],
+
+area:r[3],
+
+due:r[4],
+
+registerDate:r[5]
+
+});
+
+}
+
+for(let i=1;i<data.transactions.length;i++){
+
+let r = data.transactions[i];
+
+transactions.push({
+
+id:r[0],
+
+customerId:r[1],
+
+customerName:r[2],
+
+type:r[3],
+
+product:r[4],
+
+qty:r[5],
+
+amount:r[6],
+
+author:r[7],
+
+date:r[8]
+
+});
+
+}
+
+for(let i=1;i<data.cashsell.length;i++){
+
+let r = data.cashsell[i];
+
+cashSell.push({
+
+id:r[0],
+
+customer:r[1],
+
+product:r[2],
+
+qty:r[3],
+
+amount:r[4],
+
+author:r[5],
+
+date:r[6],
+
+time:r[7]
+
+});
+
+}
+
+showDashboard();
+
+showTransactions();
+
+showCashSell();
+
+showDueList();
+
+showProfile();
+
+updateTotalDue();
+
+updateDailySummary();
+
+});
+
+}
+
+loadOnlineData();
 </script>
 
 </body>
