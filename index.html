@@ -2249,6 +2249,37 @@ showDueList();
 
 showProfile();
 
+customers.forEach(c=>{
+
+let totalDue = 0;
+
+transactions.forEach(t=>{
+
+if(
+String(t.customerId)===String(c.id)
+){
+
+if(t.type==='Due'){
+
+totalDue += Number(t.amount);
+
+}
+
+if(t.type==='Payment'){
+
+totalDue -= Number(t.amount);
+
+}
+
+}
+
+});
+
+c.due = totalDue;
+
+});
+
+
 updateTotalDue();
 
 updateDailySummary();
