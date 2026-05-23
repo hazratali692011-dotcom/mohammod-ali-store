@@ -926,7 +926,8 @@ return;
 let customer =
 customers.find(c=>c.id==customerId);
 
-customer.due += Number(amount);
+customer.due =
+Number(customer.due) + Number(amount);
 
 let transaction={
 
@@ -1053,7 +1054,8 @@ alert('Payment বেশি');
 return;
 
 }
-customer.due -= Number(amount);
+customer.due =
+Number(customer.due) - Number(amount);
 
 let transaction={
 
@@ -2354,7 +2356,21 @@ updateDailySummary();
 }
 
 loadOnlineData();
-setInterval(loadOnlineData,3000);
+setInterval(()=>{
+
+let active =
+document.activeElement.id;
+
+if(
+active!=='customer' &&
+active!=='payCustomer'
+){
+
+loadOnlineData();
+
+}
+
+},3000);
 </script>
 
 </body>
