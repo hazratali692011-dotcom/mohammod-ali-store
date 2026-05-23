@@ -924,7 +924,9 @@ return;
 }
 
 let customer =
-customers.find(c=>c.id==customerId);
+customers.find(c=>
+String(c.id)===String(customerId)
+);
 
 customer.due =
 Number(customer.due) + Number(amount);
@@ -1008,15 +1010,17 @@ alert('Due Added');
 function showCurrentDue(){
 
 let customerId =
-document.getElementById('payCustomer').value;
+String(document.getElementById('payCustomer').value);
 
 let customer =
-customers.find(c=>c.id==customerId);
+customers.find(c=>
+String(c.id)===customerId
+);
 
 if(customer){
 
 document.getElementById('paymentDue')
-.innerText = customer.due;
+.innerText = Number(customer.due);
 
 }else{
 
@@ -1046,7 +1050,9 @@ return;
 }
 
 let customer =
-customers.find(c=>c.id==customerId);
+customers.find(c=>
+String(c.id)===String(customerId)
+);
 if(Number(amount) > customer.due){
 
 alert('Payment বেশি');
