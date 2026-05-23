@@ -560,6 +560,21 @@ Back Dashboard
 </div>
 
 <script>
+function updateDateTime(){
+
+let now = new Date();
+
+document.getElementById('todayDate').innerHTML =
+
+now.toLocaleDateString() + ' ' +
+
+now.toLocaleTimeString();
+
+}
+
+setInterval(updateDateTime,1000);
+
+updateDateTime();
 
 const scriptURL ="https://script.google.com/macros/s/AKfycbx41M1V677XdN0U3XbbFiUDbeVC5TRsfkiKqYZkp1T9TsBH8NXJKVRRAc9IlkPMdfxl/exec";
 
@@ -572,6 +587,21 @@ let cashSell = [];
 let editCustomerId = null;
 
 function saveData(){
+
+localStorage.setItem(
+'customers',
+JSON.stringify(customers)
+);
+
+localStorage.setItem(
+'transactions',
+JSON.stringify(transactions)
+);
+
+localStorage.setItem(
+'cashSell',
+JSON.stringify(cashSell)
+);
 
 }
 
@@ -689,39 +719,31 @@ return id;
 }
 function loadDropdown(){
 
-let dueCustomer =
-document.getElementById('dueCustomer');
+let customer =
+document.getElementById('customer');
 
-let paymentCustomer =
-document.getElementById('paymentCustomer');
+let payCustomer =
+document.getElementById('payCustomer');
 
-dueCustomer.innerHTML =
+customer.innerHTML =
 '<option value="">Select Customer</option>';
 
-paymentCustomer.innerHTML =
+payCustomer.innerHTML =
 '<option value="">Select Customer</option>';
 
-customers.forEach(customer=>{
+customers.forEach(c=>{
 
-let option1 =
-document.createElement('option');
+customer.innerHTML += `
+<option value="${c.id}">
+${formatCustomerId(c.id)} - ${c.name}
+</option>
+`;
 
-option1.value = customer.id;
-
-option1.textContent =
-customer.name;
-
-dueCustomer.appendChild(option1);
-
-let option2 =
-document.createElement('option');
-
-option2.value = customer.id;
-
-option2.textContent =
-customer.name;
-
-paymentCustomer.appendChild(option2);
+payCustomer.innerHTML += `
+<option value="${c.id}">
+${formatCustomerId(c.id)} - ${c.name}
+</option>
+`;
 
 });
 
@@ -772,7 +794,9 @@ let oldCustomer =
 customers.find(c=>c.id==editCustomerId);
 
 oldCustomer.name = name;
+
 oldCustomer.phone = phone;
+
 oldCustomer.area = area;
 
 transactions.forEach(t=>{
@@ -785,22 +809,27 @@ t.customerName = name;
 
 });
 
-editCustomerId = null;
-
 }else{
 
 let customer={
 
 id:getNextCustomerId(),
-name,
-phone,
-area,
+
+name:name,
+
+phone:phone,
+
+area:area,
+
 due:0,
+
 registerDate:new Date().toLocaleString()
 
 };
 
 customers.push(customer);
+
+}
 
 saveData();
 
@@ -809,6 +838,10 @@ loadDropdown();
 showDashboard();
 
 showProfile();
+
+showDueList();
+
+updateTotalDue();
 
 let currentCustomerId;
 
@@ -822,40 +855,38 @@ currentCustomerId =
 customers[customers.length-1].id;
 
 }
+
 fetch(scriptURL,{
+
 method:'POST',
+
 body:JSON.stringify({
+
 action:'saveCustomer',
+
 id:String(currentCustomerId).padStart(3,'0'),
-name,
-phone,
-area,
+
+name:name,
+
+phone:phone,
+
+area:area,
+
 due:0,
+
 registerDate:new Date().toLocaleString()
+
 })
+
 });
-
-setTimeout(()=>{
-
-location.reload();
-
-},1000);
-
-loadDropdown();
-
-showDashboard();
-
-showProfile();
-
-showDueList();
-
-updateTotalDue();
 
 document.getElementById('name').value='';
 
 document.getElementById('phone').value='';
 
 document.getElementById('area').value='';
+
+editCustomerId = null;
 
 alert('Customer Saved Successfully');
 
@@ -915,12 +946,13 @@ amount,
 
 author,
 
-date:new Date().toLocaleString()
+date:new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
 
 };
 
 transactions.push(transaction);
 
+saveData();
 fetch(scriptURL,{
 method:'POST',
 body:JSON.stringify({
@@ -1014,7 +1046,13 @@ return;
 
 let customer =
 customers.find(c=>c.id==customerId);
+if(Number(amount) > customer.due){
 
+alert('Payment বেশি');
+
+return;
+
+}
 customer.due -= Number(amount);
 
 let transaction={
@@ -1131,7 +1169,9 @@ amount,
 
 author,
 
-date:new Date().toLocaleString()
+date:new Date().toLocaleDateString(),
+
+time:new Date().toLocaleTimeString()
 
 };
 
@@ -1149,7 +1189,9 @@ product:sell.product,
 qty:sell.qty,
 amount:sell.amount,
 author:sell.author,
-date:sell.date
+date:sell.date,
+
+time:sell.time
 }),
 mode:'no-cors'
 })
@@ -2312,6 +2354,7 @@ updateDailySummary();
 }
 
 loadOnlineData();
+setInterval(loadOnlineData,3000);
 </script>
 
 </body>
