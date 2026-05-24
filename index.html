@@ -37,11 +37,32 @@ margin-bottom:10px;
 }
 
 .summary-box{
+
 padding:10px;
+
 border-radius:10px;
+
 font-weight:bold;
+
 text-align:center;
+
 font-size:16px;
+
+height:90px;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+align-items:center;
+
+box-sizing:border-box;
+
+overflow:hidden;
+font-variant-numeric:tabular-nums;
+
 }
 
 .top-search{
@@ -169,6 +190,43 @@ font-weight:bold;
 text-align:center;
 margin-bottom:10px;
 }
+.glow-title{
+
+text-align:center;
+
+font-size:42px;
+
+font-weight:bold;
+
+color:green;
+
+margin-bottom:20px;
+
+animation:glow 1s ease-in-out infinite alternate;
+
+}
+
+@keyframes glow{
+
+from{
+
+text-shadow:
+0 0 5px yellow,
+0 0 10px yellow,
+0 0 15px lime;
+
+}
+
+to{
+
+text-shadow:
+0 0 10px yellow,
+0 0 20px lime,
+0 0 30px lime;
+
+}
+
+}
 
 </style>
 
@@ -179,20 +237,11 @@ margin-bottom:10px;
 <div class="card">
 <div class="card">
 
-<marquee behavior="alternate"
-direction="left"
-scrollamount="10"
-style="
-font-size:28px;
-font-weight:bold;
-color:green;
-margin-bottom:15px;
-text-shadow:2px 2px 5px yellow;
-">
+<h1 class="glow-title">
 
- Mohammod Ali Store 
+Mohammod Ali Store
 
-</marquee>
+</h1>
 
 <h2>Dashboard</h2>
 
@@ -203,7 +252,14 @@ style="background:#fff3cd;color:black;">
 
 Current Date & Time<br>
 
-<span id="todayDate"></span>
+<div id="todayDate"
+style="
+width:100%;
+text-align:center;
+font-size:18px;
+line-height:1.5;
+">
+</div>
 
 </div>
 
@@ -564,11 +620,30 @@ function updateDateTime(){
 
 let now = new Date();
 
-document.getElementById('todayDate').innerHTML =
+let date =
+now.toLocaleDateString();
 
-now.toLocaleDateString() + ' ' +
+let time =
+now.toLocaleTimeString('en-US',{
 
-now.toLocaleTimeString();
+hour12:true,
+
+hour:'2-digit',
+
+minute:'2-digit',
+
+second:'2-digit'
+
+});
+
+document.getElementById('todayDate')
+.innerHTML = `
+
+<div>${date}</div>
+
+<div>${time}</div>
+
+`;
 
 }
 
@@ -1372,9 +1447,6 @@ document.getElementById('totalDue')
 function updateDailySummary(){
 
 let now = new Date();
-
-document.getElementById('todayDate')
-.innerText = now.toLocaleString();
 
 let dueSell = 0;
 
