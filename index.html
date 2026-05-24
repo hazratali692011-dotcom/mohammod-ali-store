@@ -586,6 +586,10 @@ let cashSell = [];
 
 let editCustomerId = null;
 
+let pendingUploads = JSON.parse(
+localStorage.getItem('pendingUploads')
+) || [];
+
 function saveData(){
 
 localStorage.setItem(
@@ -602,6 +606,41 @@ localStorage.setItem(
 'cashSell',
 JSON.stringify(cashSell)
 );
+
+}
+function syncPendingData(){
+
+if(!navigator.onLine) return;
+
+pendingUploads.forEach((item,index)=>{
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(item)
+
+})
+
+.then(()=>{
+
+pendingUploads.splice(index,1);
+
+saveData();
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+})
+
+.catch(err=>console.log(err));
+
+});
 
 }
 
@@ -868,11 +907,7 @@ customers[customers.length-1].id;
 
 }
 
-fetch(scriptURL,{
-
-method:'POST',
-
-body:JSON.stringify({
+let uploadData={
 
 action:'saveCustomer',
 
@@ -888,7 +923,27 @@ due:0,
 
 registerDate:new Date().toLocaleString()
 
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
 })
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
 
 });
 
@@ -968,9 +1023,7 @@ date:new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
 transactions.push(transaction);
 
 saveData();
-fetch(scriptURL,{
-method:'POST',
-body:JSON.stringify({
+let uploadData={
 
 action:'saveTransaction',
 
@@ -992,7 +1045,28 @@ author:transaction.author,
 
 date:transaction.date
 
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
 })
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
 });
 
 showTransactions();
@@ -1101,9 +1175,7 @@ transactions.push(transaction);
 
 saveData();
 
-fetch(scriptURL,{
-method:'POST',
-body:JSON.stringify({
+let uploadData={
 
 action:'saveTransaction',
 
@@ -1125,7 +1197,28 @@ author:transaction.author,
 
 date:transaction.date
 
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
 })
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
 });
 
 showDashboard();
@@ -1199,25 +1292,50 @@ cashSell.push(sell);
 
 saveData();
 
-fetch(scriptURL,{
-method:'POST',
-body:JSON.stringify({
+let uploadData={
+
 action:'saveCashSell',
+
 id:sell.id,
+
 customer:sell.customer,
+
 product:sell.product,
+
 qty:sell.qty,
+
 amount:sell.amount,
+
 author:sell.author,
+
 date:sell.date,
 
 time:sell.time
-}),
-mode:'no-cors'
+
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
 })
-.then(res=>res.text())
-.then(data=>console.log(data))
-.catch(err=>console.log(err));
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+});
+
 showCashSell();
 
 updateDailySummary();
@@ -1386,15 +1504,34 @@ transactions.filter(t=>t.customerId!=id);
 
 saveData();
 
-fetch(scriptURL,{
-method:'POST',
-body:JSON.stringify({
+let uploadData={
 
 action:'deleteCustomer',
 
 id:id
 
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
 })
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
 });
 
 loadDropdown();
@@ -1581,17 +1718,33 @@ cashSell.filter(c=>c.id!=id);
 
 saveData();
 
-fetch(scriptURL,{
-
-method:'POST',
-
-body:JSON.stringify({
+let uploadData={
 
 action:'deleteCashSell',
 
 id:id
 
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
 })
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
 
 });
 
@@ -1748,15 +1901,34 @@ transactions.filter(t=>t.id!=id);
 
 saveData();
 
-fetch(scriptURL,{
-method:'POST',
-body:JSON.stringify({
+let uploadData={
 
 action:'deleteTransaction',
 
 id:id
 
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
 })
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
 });
 
 showTransactions();
@@ -2303,6 +2475,8 @@ updateTotalDue();
 updateDailySummary();
 function loadOnlineData(){
 
+if(pendingUploads.length>0) return;
+
 fetch(scriptURL)
 
 .then(res=>res.json())
@@ -2453,6 +2627,7 @@ loadOnlineData();
 }
 
 },30000);
+setInterval(syncPendingData,5000);
 </script>
 
 </body>
