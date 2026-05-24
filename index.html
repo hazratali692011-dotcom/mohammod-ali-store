@@ -1581,6 +1581,20 @@ cashSell.filter(c=>c.id!=id);
 
 saveData();
 
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify({
+
+action:'deleteCashSell',
+
+id:id
+
+})
+
+});
+
 showCashSell();
 
 updateDailySummary();
@@ -1590,6 +1604,7 @@ alert('Deleted Successfully');
 }
 
 }
+
 function showTransactions(){
 
 let table =
