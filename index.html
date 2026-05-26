@@ -171,15 +171,19 @@ color:white;
 .action-btn{
 display:flex;
 justify-content:center;
-gap:3px;
-flex-wrap:wrap;
+align-items:center;
+gap:5px;
+flex-wrap:nowrap;
+
 }
 
 .action-btn button{
-width:auto;
-height:auto;
-padding:5px 7px;
+width:70px;
+height:32px;
+padding:4px;
 font-size:11px;
+margin:0;
+
 }
 
 .current-due-box{
@@ -234,7 +238,6 @@ text-shadow:
 
 <body>
 
-<div class="card">
 <div class="card">
 
 <h1 class="glow-title">
@@ -292,6 +295,19 @@ Due Sell<br>
 
 </div>
 
+<div id="lowStockBox"
+style="display:none;">
+
+<h3 style="color:red;">
+
+⚠️ Low Stock Alert
+
+</h3>
+
+<div id="lowStockList"></div>
+
+</div>
+
 <div class="summary-box"
 style="background:red;color:white;font-size:18px;">
 
@@ -345,6 +361,22 @@ Current Due
 Profile
 </button>
 
+<button onclick="showSection('productSection')">
+Products
+</button>
+
+<button onclick="showSection('stockSection')">
+Stock
+</button>
+
+<button onclick="showSection('stockReportSection')">
+Stock Report
+</button>
+
+<button onclick="showSection('priceSection')">
+Price List
+</button>
+
 </div>
 
 <table id="dashboardTable"></table>
@@ -384,14 +416,15 @@ class="card section">
 
 <select id="customer"></select>
 
-<input id="product"
-placeholder="Product Name">
+<select id="product">
+</select>
 
 <input id="qty"
 placeholder="Quantity">
 
 <input id="amount"
-placeholder="Amount">
+placeholder="Amount"
+readonly>
 
 <select id="dueAuthor">
 
@@ -472,14 +505,15 @@ class="card section">
 <input id="cashCustomer"
 placeholder="Customer Name">
 
-<input id="cashProduct"
-placeholder="Product Name">
+<select id="cashProduct">
+</select>
 
 <input id="cashQty"
 placeholder="Quantity">
 
 <input id="cashAmount"
-placeholder="Amount">
+placeholder="Amount"
+readonly>
 
 <select id="cashAuthor">
 
@@ -594,6 +628,134 @@ Back Dashboard
 <table id="dueTable"></table>
 
 </div>
+<div id="productSection"
+class="card section">
+
+<h3>Product Entry</h3>
+
+<input id="productName"
+placeholder="Product Name">
+
+<button id="saveProductBtn"
+onclick="saveProduct()">
+
+Save Product
+
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
+
+<table id="productTable"></table>
+
+</div>
+
+<div id="stockSection"
+class="card section">
+
+<h3>Stock Entry</h3>
+
+<input type="date"
+id="stockDate">
+
+<select id="stockProduct">
+</select>
+
+<input id="stockQty"
+placeholder="Quantity">
+
+<input id="stockRate"
+placeholder="Rate">
+
+<input id="stockTotal"
+placeholder="Total">
+
+<button onclick="saveStock()">
+
+Save Stock
+
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
+
+<table id="stockTable"></table>
+
+</div>
+
+<div id="stockReportSection"
+class="card section">
+
+<h3>Stock Report</h3>
+
+<input type="date"
+id="stockFilterDate"
+onchange="showStockReport()">
+
+<select id="stockFilterProduct"
+onchange="showStockReport()">
+</select>
+
+<button class="clear-btn"
+onclick="clearStockFilter()">
+
+Clear
+
+</button>
+
+<button class="print-btn"
+onclick="printStockReport()">
+
+Print A4
+
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
+
+<table id="stockReportTable"></table>
+
+</div>
+
+<div id="priceSection"
+class="card section">
+
+<h3>Price List</h3>
+
+<select id="priceProduct">
+</select>
+
+<input id="sellPrice"
+placeholder="Sell Price">
+
+<button onclick="saveSellPrice()">
+
+Save Price
+
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
+
+<table id="priceTable"></table>
+
+</div>
 
 <div id="profileSection"
 class="card section">
@@ -659,6 +821,18 @@ let transactions = [];
 
 let cashSell = [];
 
+let products = JSON.parse(
+localStorage.getItem('products')
+) || [];
+
+let stockData = JSON.parse(
+localStorage.getItem('stockData')
+) || [];
+
+let sellPrices = JSON.parse(
+localStorage.getItem('sellPrices')
+) || [];
+
 let editCustomerId = null;
 
 let pendingUploads = JSON.parse(
@@ -681,27 +855,49 @@ localStorage.setItem(
 'cashSell',
 JSON.stringify(cashSell)
 );
+localStorage.setItem(
+'products',
+JSON.stringify(products)
+);
+
+localStorage.setItem(
+'stockData',
+JSON.stringify(stockData)
+);
+localStorage.setItem(
+'sellPrices',
+JSON.stringify(sellPrices)
+);
 
 }
-function syncPendingData(){
+async function syncPendingData(){
 
 if(!navigator.onLine) return;
 
-pendingUploads.forEach((item,index)=>{
+for(let i=pendingUploads.length-1;i>=0;i--){
 
-fetch(scriptURL,{
+let item = pendingUploads[i];
+
+try{
+
+await fetch(scriptURL,{
 
 method:'POST',
 
 body:JSON.stringify(item)
 
-})
+});
 
-.then(()=>{
+pendingUploads.splice(i,1);
 
-pendingUploads.splice(index,1);
+}
+catch(err){
 
-saveData();
+console.log(err);
+
+}
+
+}
 
 localStorage.setItem(
 
@@ -710,12 +906,6 @@ localStorage.setItem(
 JSON.stringify(pendingUploads)
 
 );
-
-})
-
-.catch(err=>console.log(err));
-
-});
 
 }
 
@@ -875,6 +1065,412 @@ payOld;
 
 }
 
+function loadProductDropdown(){
+
+let stockProduct =
+document.getElementById('stockProduct');
+
+let stockFilterProduct =
+document.getElementById(
+'stockFilterProduct'
+);
+
+let priceProduct =
+document.getElementById(
+'priceProduct'
+);
+
+let dueProduct =
+document.getElementById('product');
+
+let cashProduct =
+document.getElementById('cashProduct');
+
+dueProduct.innerHTML =
+'<option value="">Select Product</option>';
+
+cashProduct.innerHTML =
+'<option value="">Select Product</option>';
+
+stockProduct.innerHTML =
+'<option value="">Select Product</option>';
+
+stockFilterProduct.innerHTML =
+'<option value="">All Products</option>';
+priceProduct.innerHTML =
+'<option value="">Select Product</option>';
+
+products.forEach(p=>{
+
+dueProduct.innerHTML += `
+
+<option value="${p.name}">
+${p.name}
+</option>
+
+`;
+
+cashProduct.innerHTML += `
+
+<option value="${p.name}">
+${p.name}
+</option>
+
+`;
+
+stockProduct.innerHTML += `
+
+<option value="${p.name}">
+${p.name}
+</option>
+
+`;
+
+stockFilterProduct.innerHTML += `
+
+<option value="${p.name}">
+${p.name}
+</option>
+
+`;
+
+priceProduct.innerHTML += `
+
+<option value="${p.name}">
+${p.name}
+</option>
+
+`;
+
+});
+
+}
+
+function saveProduct(){
+
+document.getElementById(
+'saveProductBtn'
+).disabled = true;
+
+let name =
+document.getElementById('productName')
+.value.trim();
+
+document.getElementById(
+'saveProductBtn'
+).disabled = false;
+
+if(!name){
+
+alert('Product Name Required');
+
+return;
+
+}
+
+
+let already =
+products.find(p=>
+p.name.toLowerCase()===name.toLowerCase()
+);
+
+document.getElementById(
+'saveProductBtn'
+).disabled = false;
+
+if(already){
+
+alert('Product Already Exists');
+
+return;
+
+}
+
+let product={
+
+id:products.length+1,
+
+name:name
+
+};
+
+products.push(product);
+let uploadData={
+
+action:'saveProduct',
+
+id:product.id,
+
+name:product.name
+
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
+})
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+});
+
+saveData();
+
+showProducts();
+
+loadProductDropdown();
+
+document.getElementById(
+'productName'
+).value='';
+
+document.getElementById(
+'saveProductBtn'
+).disabled = false;
+
+alert('Product Saved');
+
+}
+
+function saveSellPrice(){
+
+let product =
+document.getElementById(
+'priceProduct'
+).value;
+
+let price =
+document.getElementById(
+'sellPrice'
+).value;
+
+if(!product || !price){
+
+alert('Fill All Fields');
+
+return;
+
+}
+
+let already =
+sellPrices.find(
+p=>p.product===product
+);
+
+if(already){
+
+already.price = Number(price);
+
+}else{
+
+sellPrices.push({
+
+id:sellPrices.length+1,
+
+product,
+
+price:Number(price)
+
+});
+
+}
+
+saveData();
+
+let uploadData={
+
+action:'saveSellPrice',
+
+id:sellPrices.length,
+
+product:product,
+
+price:price
+
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
+})
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+});
+
+showPriceList();
+
+document.getElementById(
+'sellPrice'
+).value='';
+
+alert('Price Saved');
+
+}
+
+function showProducts(){
+
+let table =
+document.getElementById('productTable');
+
+table.innerHTML = `
+
+<tr>
+
+<th>ID</th>
+<th>Product Name</th>
+
+</tr>
+
+`;
+
+products.forEach(p=>{
+
+table.innerHTML += `
+
+<tr>
+
+<td>${p.id}</td>
+
+<td>${p.name}</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+function showPriceList(){
+
+let table =
+document.getElementById(
+'priceTable'
+);
+
+table.innerHTML = `
+
+<tr>
+
+<th>ID</th>
+<th>Product</th>
+<th>Sell Price</th>
+<th>Action</th>
+
+</tr>
+
+`;
+
+sellPrices.forEach(p=>{
+
+table.innerHTML += `
+
+<tr>
+
+<td>${p.id}</td>
+
+<td>${p.product}</td>
+
+<td>${p.price}</td>
+
+<td>
+
+<div class="action-btn">
+
+<button class="edit-btn"
+
+onclick="editSellPrice(${p.id})">
+
+Edit
+
+</button>
+
+<button class="delete-btn"
+
+onclick="deleteSellPrice(${p.id})">
+
+Delete
+
+</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+function editSellPrice(id){
+
+let item =
+sellPrices.find(
+p=>p.id===id
+);
+
+document.getElementById(
+'priceProduct'
+).value = item.product;
+
+document.getElementById(
+'sellPrice'
+).value = item.price;
+
+deleteSellPrice(id);
+
+showSection('priceSection');
+
+}
+
+function deleteSellPrice(id){
+
+if(!confirm('Delete Price?'))
+return;
+
+sellPrices =
+sellPrices.filter(
+p=>p.id!==id
+);
+
+saveData();
+
+showPriceList();
+
+alert('Price Deleted');
+
+}
+
 function editCustomer(id){
 
 let customer =
@@ -892,6 +1488,545 @@ customer.area;
 editCustomerId = id;
 
 showSection('customerSection');
+
+}
+
+document.getElementById('stockQty')
+.addEventListener('input',calculateStockTotal);
+
+document.getElementById('stockRate')
+.addEventListener('input',calculateStockTotal);
+
+document.getElementById('product')
+.addEventListener('change',setDuePrice);
+
+document.getElementById('qty')
+.addEventListener('input',calculateDueAmount);
+
+document.getElementById('cashProduct')
+.addEventListener('change',setCashPrice);
+
+document.getElementById('cashQty')
+.addEventListener('input',calculateCashAmount);
+
+function calculateStockTotal(){
+
+let qty =
+Number(document.getElementById('stockQty').value)||0;
+
+let rate =
+Number(document.getElementById('stockRate').value)||0;
+
+document.getElementById('stockTotal').value =
+qty * rate;
+
+}
+
+function setDuePrice(){
+
+let product =
+document.getElementById(
+'product'
+).value;
+
+let item =
+sellPrices.find(
+p=>p.product===product
+);
+
+if(item){
+
+document.getElementById(
+'amount'
+).value = item.price;
+
+}else{
+
+document.getElementById(
+'amount'
+).value = '';
+
+}
+
+}
+
+function calculateDueAmount(){
+
+let product =
+document.getElementById(
+'product'
+).value;
+
+let qty =
+Number(
+document.getElementById(
+'qty'
+).value
+)||0;
+
+let item =
+sellPrices.find(
+p=>p.product===product
+);
+
+if(item){
+
+document.getElementById(
+'amount'
+).value =
+qty * Number(item.price);
+
+}
+
+}
+
+function setCashPrice(){
+
+let product =
+document.getElementById(
+'cashProduct'
+).value;
+
+let item =
+sellPrices.find(
+p=>p.product===product
+);
+
+if(item){
+
+document.getElementById(
+'cashAmount'
+).value = item.price;
+
+}else{
+
+document.getElementById(
+'cashAmount'
+).value = '';
+
+}
+
+}
+
+function calculateCashAmount(){
+
+let product =
+document.getElementById(
+'cashProduct'
+).value;
+
+let qty =
+Number(
+document.getElementById(
+'cashQty'
+).value
+)||0;
+
+let item =
+sellPrices.find(
+p=>p.product===product
+);
+
+if(item){
+
+document.getElementById(
+'cashAmount'
+).value =
+qty * Number(item.price);
+
+}
+
+}
+
+function getNextStockId(){
+
+if(stockData.length===0)
+return 1;
+
+return Math.max(
+...stockData.map(s=>Number(s.id))
+)+1;
+
+}
+
+function saveStock(){
+
+let date =
+document.getElementById('stockDate').value;
+
+let product =
+document.getElementById('stockProduct').value;
+
+let qty =
+document.getElementById('stockQty').value;
+
+let rate =
+document.getElementById('stockRate').value;
+
+let total =
+document.getElementById('stockTotal').value;
+
+if(
+!date ||
+!product ||
+!qty ||
+!rate ||
+!total
+){
+
+alert('Fill All Fields');
+
+return;
+
+}
+
+if(editStockId){
+
+let old =
+stockData.find(
+s=>s.id===editStockId
+);
+
+old.date = date;
+
+old.product = product;
+
+old.qty = Number(qty);
+
+old.rate = Number(rate);
+
+old.total = Number(total);
+
+old.currentQty =
+getCurrentStock(product);
+
+old.currentTotal =
+old.currentQty *
+Number(rate);
+
+editStockId = null;
+
+saveData();
+
+showStock();
+
+showStockReport();
+showLowStock();
+
+alert('Stock Updated');
+
+return;
+
+}
+
+let stock={
+
+id:getNextStockId(),
+
+date,
+
+product,
+
+qty:Number(qty),
+
+rate:Number(rate),
+
+total:Number(total)
+
+};
+
+stockData.push(stock);
+
+let uploadData={
+
+action:'saveStock',
+
+id:stock.id,
+
+date:stock.date,
+
+product:stock.product,
+
+qty:stock.qty,
+
+rate:stock.rate,
+
+total:stock.total
+
+,
+
+currentQty:getCurrentStock(
+stock.product
+),
+
+currentTotal:
+getCurrentStock(stock.product)
+*
+Number(stock.rate)
+
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
+})
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+});
+
+saveData();
+
+showStock();
+
+showStockReport();
+showLowStock();
+
+document.getElementById('stockQty').value='';
+
+document.getElementById('stockRate').value='';
+
+document.getElementById('stockTotal').value='';
+
+alert('Stock Saved');
+
+}
+
+function getCurrentStock(productName){
+
+let stockIn = 0;
+
+stockData.forEach(s=>{
+
+if(s.product===productName){
+
+stockIn += Number(s.qty);
+
+}
+
+});
+
+let sold = 0;
+
+transactions.forEach(t=>{
+
+if(
+t.product===productName &&
+t.type==='Due'
+){
+
+sold += Number(t.qty);
+
+}
+
+});
+
+cashSell.forEach(c=>{
+
+if(c.product===productName){
+
+sold += Number(c.qty);
+
+}
+
+});
+
+return stockIn - sold;
+
+}
+
+let editStockId = null;
+
+function editStock(id){
+
+let stock =
+stockData.find(s=>s.id===id);
+
+document.getElementById('stockDate').value =
+stock.date;
+
+document.getElementById('stockProduct').value =
+stock.product;
+
+document.getElementById('stockQty').value =
+stock.qty;
+
+document.getElementById('stockRate').value =
+stock.rate;
+
+document.getElementById('stockTotal').value =
+stock.total;
+
+editStockId = id;
+
+showSection('stockSection');
+
+}
+
+function deleteStock(id){
+
+if(!confirm('Delete Stock?'))
+return;
+
+stockData =
+stockData.filter(s=>s.id!==id);
+
+saveData();
+
+showStock();
+
+showStockReport();
+
+showLowStock();
+
+let uploadData={
+
+action:'deleteStock',
+
+id:id
+
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
+})
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+});
+
+alert('Stock Deleted');
+
+}
+
+function showStock(){
+
+let table =
+document.getElementById('stockTable');
+
+table.innerHTML = `
+
+<tr>
+
+<th>ID</th>
+<th>Date</th>
+<th>Product</th>
+<th>Qty</th>
+<th>Rate</th>
+<th>Total</th>
+<th>Current Stock</th>
+
+<th>Action</th>
+
+</tr>
+
+`;
+
+let totalBalance = 0;
+
+stockData.forEach(s=>{
+
+totalBalance += Number(s.total);
+
+let current =
+getCurrentStock(s.product);
+
+table.innerHTML += `
+
+<tr>
+
+<td>${s.id}</td>
+
+<td>${s.date}</td>
+
+<td>${s.product}</td>
+
+<td>${s.qty}</td>
+
+<td>${s.rate}</td>
+
+<td>${s.total}</td>
+
+<td style="
+color:
+${current<=5?'red':'green'};
+font-weight:bold;
+">
+
+${current}
+
+${current<=5?'⚠️':''}
+
+</td>
+
+<td>
+
+<div class="action-btn">
+
+<button class="delete-btn"
+
+onclick="deleteStock(${s.id})">
+
+Delete
+
+</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+table.innerHTML += `
+
+<tr>
+
+<th colspan="5">
+
+Total Stock Balance
+
+</th>
+
+<th colspan="2">
+
+${totalBalance} Tk
+
+</th>
+
+</tr>
+
+`;
 
 }
 
@@ -979,6 +2114,33 @@ currentCustomerId = editCustomerId;
 
 currentCustomerId =
 customers[customers.length-1].id;
+
+}
+if(editCustomerId){
+
+saveData();
+
+loadDropdown();
+
+showDashboard();
+
+showProfile();
+
+showDueList();
+
+updateTotalDue();
+
+document.getElementById('name').value='';
+
+document.getElementById('phone').value='';
+
+document.getElementById('area').value='';
+
+editCustomerId = null;
+
+alert('Customer Updated');
+
+return;
 
 }
 
@@ -1095,6 +2257,25 @@ date:new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
 
 };
 
+let currentStock =
+getCurrentStock(product);
+
+if(Number(qty)>currentStock){
+
+alert('Stock Not Available');
+
+customer.due =
+
+Number(customer.due || 0)
+
+-
+
+Number(amount || 0);
+
+return;
+
+}
+
 transactions.push(transaction);
 
 saveData();
@@ -1151,6 +2332,9 @@ showDueList();
 showProfile();
 
 showDashboard();
+showStock();
+
+showLowStock();
 
 updateTotalDue();
 
@@ -1222,7 +2406,12 @@ return;
 
 }
 customer.due =
-Number(customer.due) - Number(amount);
+
+Number(customer.due || 0)
+
+-
+
+Number(amount || 0);
 
 let transaction={
 
@@ -1247,6 +2436,7 @@ date:new Date().toLocaleString()
 };
 
 transactions.push(transaction);
+
 
 saveData();
 
@@ -1296,6 +2486,7 @@ JSON.stringify(pendingUploads)
 
 });
 
+loadDropdown();
 showDashboard();
 
 showTransactions();
@@ -1363,6 +2554,17 @@ time:new Date().toLocaleTimeString()
 
 };
 
+let currentStock =
+getCurrentStock(product);
+
+if(Number(qty)>currentStock){
+
+alert('Stock Not Available');
+
+return;
+
+}
+
 cashSell.push(sell);
 
 saveData();
@@ -1413,7 +2615,13 @@ JSON.stringify(pendingUploads)
 
 showCashSell();
 
+showStock();
+
+showLowStock();
+
 updateDailySummary();
+
+showStockReport();
 
 document.getElementById('cashCustomer').value='';
 
@@ -1446,13 +2654,21 @@ document.getElementById('totalDue')
 
 function updateDailySummary(){
 
-let now = new Date();
-
 let dueSell = 0;
+
+let today =
+getOnlyDate(new Date());
 
 transactions.forEach(t=>{
 
-if(t.type==='Due'){
+let rowDate =
+getOnlyDate(t.date);
+
+if(
+t.type==='Due'
+&&
+rowDate===today
+){
 
 dueSell += Number(t.amount);
 
@@ -1464,7 +2680,14 @@ let nagad = 0;
 
 cashSell.forEach(c=>{
 
+let rowDate =
+getOnlyDate(c.date);
+
+if(rowDate===today){
+
 nagad += Number(c.amount);
+
+}
 
 });
 
@@ -1480,8 +2703,6 @@ document.getElementById('totalSell')
 .innerText = total;
 
 }
-
-setInterval(updateDailySummary,1000);
 
 function showDashboard(){
 
@@ -1568,11 +2789,23 @@ function deleteCustomer(id){
 
 if(confirm('Delete Customer?')){
 
+let customer =
+customers.find(c=>c.id==id);
+
 customers =
 customers.filter(c=>c.id!=id);
 
 transactions =
 transactions.filter(t=>t.customerId!=id);
+
+if(customer){
+
+cashSell =
+cashSell.filter(
+c=>c.customer!==customer.name
+);
+
+}
 
 saveData();
 
@@ -1763,17 +2996,57 @@ let cells = row.querySelectorAll('td');
 let item =
 cashSell.find(c=>c.id==id);
 
-item.customer = cells[1].innerText;
+let oldProduct =
+item.product;
 
-item.product = cells[2].innerText;
+let oldQty =
+Number(item.qty);
 
-item.qty = cells[3].innerText;
+let newProduct =
+cells[2].innerText;
 
-item.amount = cells[4].innerText;
+let newQty =
+Number(cells[3].innerText);
+
+let available =
+getCurrentStock(newProduct);
+
+if(oldProduct===newProduct){
+
+available += oldQty;
+
+}
+
+if(newQty>available){
+
+alert('Stock Not Available');
+
+showCashSell();
+
+return;
+
+}
+
+item.customer =
+cells[1].innerText;
+
+item.product =
+newProduct;
+
+item.qty =
+newQty;
+
+item.amount =
+cells[4].innerText;
+
 
 saveData();
 
 showCashSell();
+
+showStock();
+
+showLowStock();
 
 updateDailySummary();
 
@@ -1822,6 +3095,10 @@ JSON.stringify(pendingUploads)
 
 showCashSell();
 
+
+showStock();
+
+showLowStock();
 updateDailySummary();
 
 alert('Deleted Successfully');
@@ -1948,15 +3225,93 @@ let cells = row.querySelectorAll('td');
 let item =
 transactions.find(t=>t.id==id);
 
-item.product = cells[3].innerText;
+let oldAmount =
+Number(item.amount);
 
-item.qty = cells[4].innerText;
+let oldProduct =
+item.product;
 
-item.amount = cells[5].innerText;
+let oldQty =
+Number(item.qty);
+
+let newProduct =
+cells[3].innerText;
+
+let newQty =
+Number(cells[4].innerText);
+
+if(item.type==='Due'){
+
+let available =
+getCurrentStock(newProduct);
+
+if(oldProduct===newProduct){
+
+available += oldQty;
+
+}
+
+if(newQty>available){
+
+alert('Stock Not Available');
+
+showTransactions();
+
+return;
+
+}
+
+}
+
+item.product =
+newProduct;
+
+item.qty =
+newQty;
+
+item.amount =
+cells[5].innerText;
+
+
+let customer =
+customers.find(
+c=>String(c.id)===
+String(item.customerId)
+);
+
+if(customer){
+
+if(item.type==='Due'){
+
+customer.due =
+customer.due
+-
+oldAmount
++
+Number(item.amount);
+
+}
+
+if(item.type==='Payment'){
+
+customer.due =
+customer.due
++
+oldAmount
+-
+Number(item.amount);
+
+}
+
+}
 
 saveData();
 
 showTransactions();
+
+showStock();
+
+showLowStock();
 
 updateDailySummary();
 
@@ -1967,6 +3322,37 @@ alert('Transaction Updated');
 function deleteTransaction(id){
 
 if(confirm('Delete Transaction?')){
+
+let old =
+transactions.find(t=>t.id==id);
+
+if(old){
+
+let customer =
+customers.find(
+c=>String(c.id)===
+String(old.customerId)
+);
+
+if(customer){
+
+if(old.type==='Due'){
+
+customer.due -=
+Number(old.amount);
+
+}
+
+if(old.type==='Payment'){
+
+customer.due +=
+Number(old.amount);
+
+}
+
+}
+
+}
 
 transactions =
 transactions.filter(t=>t.id!=id);
@@ -2006,6 +3392,9 @@ JSON.stringify(pendingUploads)
 showTransactions();
 
 showProfile();
+showStock();
+
+showLowStock();
 
 updateDailySummary();
 
@@ -2545,6 +3934,16 @@ showProfile();
 updateTotalDue();
 
 updateDailySummary();
+
+showProducts();
+
+showPriceList();
+showStock();
+showLowStock();
+
+showStockReport();
+
+loadProductDropdown();
 function loadOnlineData(){
 
 if(pendingUploads.length>0) return;
@@ -2560,6 +3959,11 @@ customers = [];
 transactions = [];
 
 cashSell = [];
+
+products = [];
+
+stockData = [];
+sellPrices = [];
 
 for(let i=1;i<data.customers.length;i++){
 
@@ -2605,7 +4009,7 @@ amount:r[6],
 
 author:r[7],
 
-date:r[8]
+date:new Date(r[8]).toLocaleString()
 
 });
 
@@ -2629,13 +4033,66 @@ amount:r[4],
 
 author:r[5],
 
-date:r[6],
+date:new Date(r[6]).toLocaleDateString(),
 
 time:r[7]
 
 });
 
 }
+
+for(let i=1;i<data.products.length;i++){
+
+let r = data.products[i];
+
+products.push({
+
+id:r[0],
+
+name:r[1]
+
+});
+
+}
+
+for(let i=1;i<data.stock.length;i++){
+
+let r = data.stock[i];
+
+stockData.push({
+
+id:r[0],
+
+date:r[1],
+
+product:r[2],
+
+qty:r[3],
+
+rate:r[4],
+
+total:r[5]
+
+});
+
+}
+
+for(let i=1;i<data.sellPrice.length;i++){
+
+let r = data.sellPrice[i];
+
+sellPrices.push({
+
+id:r[0],
+
+product:r[1],
+
+price:r[2]
+
+});
+
+}
+
 customers.forEach(c=>{
 
 let totalDue = 0;
@@ -2678,6 +4135,18 @@ showDueList();
 
 showProfile();
 
+showProducts();
+
+showPriceList();
+
+showStock();
+
+showLowStock();
+
+showStockReport();
+
+loadProductDropdown();
+
 updateTotalDue();
 
 updateDailySummary();
@@ -2687,18 +4156,290 @@ updateDailySummary();
 }
 
 loadOnlineData();
+
 setInterval(()=>{
 
-if(
-document.activeElement.id !== 'customer' &&
-document.activeElement.id !== 'payCustomer'
-){
+let active =
+document.activeElement.id;
+
+let editing = [
+
+'customer',
+'payCustomer',
+'name',
+'phone',
+'area',
+'qty',
+'amount',
+'cashQty',
+'cashAmount',
+'stockQty',
+'stockRate',
+'sellPrice'
+
+];
+
+if(!editing.includes(active)){
 
 loadOnlineData();
 
 }
 
 },30000);
+
+function showLowStock(){
+
+let box =
+document.getElementById(
+'lowStockBox'
+);
+
+let list =
+document.getElementById(
+'lowStockList'
+);
+
+list.innerHTML='';
+
+let found = false;
+
+products.forEach(p=>{
+
+let current =
+getCurrentStock(p.name);
+
+if(current<=5){
+
+found = true;
+
+list.innerHTML += `
+
+<div style="
+padding:5px;
+margin:5px 0;
+background:#ffe5e5;
+border-radius:5px;
+font-weight:bold;
+">
+
+${p.name} →
+${current}
+
+</div>
+
+`;
+
+}
+
+});
+
+if(found){
+
+box.style.display='block';
+
+}else{
+
+box.style.display='none';
+
+}
+
+}
+
+function showStockReport(){
+
+let table =
+document.getElementById(
+'stockReportTable'
+);
+
+let date =
+document.getElementById(
+'stockFilterDate'
+).value;
+
+let product =
+document.getElementById(
+'stockFilterProduct'
+).value;
+
+table.innerHTML = `
+
+<tr>
+
+<th>ID</th>
+<th>Date</th>
+<th>Product</th>
+<th>Qty</th>
+<th>Rate</th>
+<th>Total</th>
+<th>Current Qty</th>
+<th>Current Total</th>
+
+</tr>
+
+`;
+
+let grand = 0;
+
+let currentGrand = 0;
+
+stockData.forEach(s=>{
+
+let ok = true;
+
+if(date && s.date!==date){
+
+ok = false;
+
+}
+
+if(product && s.product!==product){
+
+ok = false;
+
+}
+
+if(ok){
+
+grand += Number(s.total);
+
+let currentQty =
+getCurrentStock(s.product);
+
+let currentTotal =
+currentQty * Number(s.rate);
+
+currentGrand += currentTotal;
+
+table.innerHTML += `
+
+<tr>
+
+<td>${s.id}</td>
+
+<td>${s.date}</td>
+
+<td>${s.product}</td>
+
+<td>${s.qty}</td>
+
+<td>${s.rate}</td>
+
+<td>${s.total}</td>
+<td>${currentQty}</td>
+
+<td>${currentTotal}</td>
+
+</tr>
+
+`;
+
+}
+
+});
+
+table.innerHTML += `
+
+<tr>
+
+<th colspan="5">
+
+Grand Total
+
+</th>
+
+<th>
+
+${grand}
+
+</th>
+
+<th></th>
+
+<th>
+
+${currentGrand}
+
+</th>
+
+</tr>
+
+`;
+
+}
+
+function clearStockFilter(){
+
+document.getElementById(
+'stockFilterDate'
+).value='';
+
+document.getElementById(
+'stockFilterProduct'
+).value='';
+
+showStockReport();
+
+}
+
+function printStockReport(){
+
+let table =
+document.getElementById(
+'stockReportTable'
+).outerHTML;
+
+let w = window.open();
+
+let d =
+new Date().toLocaleString();
+
+w.document.write(`
+
+<h2 style="text-align:center;">
+Mohammod Ali Store
+</h2>
+
+<h3 style="text-align:center;">
+Stock Report
+</h3>
+
+<p style="text-align:center;">
+Print Date & Time : ${d}
+</p>
+
+${table}
+
+<style>
+
+@page{
+size:A4;
+}
+
+body{
+font-family:Arial;
+padding:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid black;
+padding:8px;
+text-align:center;
+}
+
+</style>
+
+`);
+
+w.print();
+
+}
+
 setInterval(syncPendingData,5000);
 </script>
 
