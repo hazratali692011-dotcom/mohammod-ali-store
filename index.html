@@ -377,6 +377,10 @@ Stock Report
 Price List
 </button>
 
+<button onclick="showSection('buyListSection')">
+Buy List
+</button>
+
 </div>
 
 <table id="dashboardTable"></table>
@@ -680,6 +684,13 @@ Save Stock
 
 </button>
 
+<button class="print-btn"
+onclick="printStockEntry()">
+
+Print A4
+
+</button>
+
 <button class="back-btn"
 onclick="goDashboard()">
 
@@ -757,6 +768,80 @@ Back Dashboard
 
 </div>
 
+<div id="buyListSection"
+class="card section">
+
+<h3>Buy List</h3>
+
+<input type="date"
+id="buyDate">
+
+<select id="buyProduct">
+</select>
+<div id="buyCurrentStock"
+
+style="
+font-weight:bold;
+color:green;
+margin:5px 0;
+">
+
+Current Stock : 0
+
+</div>
+
+<input id="buyQty"
+placeholder="Quantity">
+
+<input id="buyRate"
+placeholder="Rate"
+readonly>
+
+<input id="buyAmount"
+placeholder="Amount"
+readonly>
+
+<button onclick="saveBuyList()">
+
+Save Buy List
+
+</button>
+
+<button class="print-btn"
+onclick="printBuyList()">
+
+Print A5
+
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
+
+<hr>
+
+<div class="top-search">
+
+<input type="date"
+id="buySearchDate"
+onchange="showBuyList()">
+
+<button class="delete-btn"
+onclick="deleteBuyDate()">
+
+Delete By Date
+
+</button>
+
+</div>
+
+<table id="buyTable"></table>
+
+</div>
+
 <div id="profileSection"
 class="card section">
 
@@ -829,6 +914,15 @@ let stockData = JSON.parse(
 localStorage.getItem('stockData')
 ) || [];
 
+let buyList = JSON.parse(
+
+localStorage.getItem(
+'buyList'
+
+)
+
+) || [];
+
 let sellPrices = JSON.parse(
 localStorage.getItem('sellPrices')
 ) || [];
@@ -863,6 +957,14 @@ JSON.stringify(products)
 localStorage.setItem(
 'stockData',
 JSON.stringify(stockData)
+);
+
+localStorage.setItem(
+
+'buyList',
+
+JSON.stringify(buyList)
+
 );
 localStorage.setItem(
 'sellPrices',
@@ -1080,6 +1182,11 @@ document.getElementById(
 'priceProduct'
 );
 
+let buyProduct =
+document.getElementById(
+'buyProduct'
+);
+
 let dueProduct =
 document.getElementById('product');
 
@@ -1098,6 +1205,9 @@ stockProduct.innerHTML =
 stockFilterProduct.innerHTML =
 '<option value="">All Products</option>';
 priceProduct.innerHTML =
+'<option value="">Select Product</option>';
+
+buyProduct.innerHTML =
 '<option value="">Select Product</option>';
 
 products.forEach(p=>{
@@ -1135,6 +1245,14 @@ ${p.name}
 `;
 
 priceProduct.innerHTML += `
+
+<option value="${p.name}">
+${p.name}
+</option>
+
+`;
+
+buyProduct.innerHTML += `
 
 <option value="${p.name}">
 ${p.name}
@@ -1509,6 +1627,12 @@ document.getElementById('cashProduct')
 document.getElementById('cashQty')
 .addEventListener('input',calculateCashAmount);
 
+document.getElementById('buyProduct')
+.addEventListener('change',setBuyRate);
+
+document.getElementById('buyQty')
+.addEventListener('input',calculateBuyAmount);
+
 function calculateStockTotal(){
 
 let qty =
@@ -1638,6 +1762,77 @@ qty * Number(item.price);
 
 }
 
+function setBuyRate(){
+
+let product =
+document.getElementById(
+'buyProduct'
+).value;
+
+let last = null;
+
+stockData.forEach(s=>{
+
+if(s.product===product){
+
+last = s;
+
+}
+
+});
+
+if(last){
+
+document.getElementById(
+'buyRate'
+).value = last.rate;
+
+}else{
+
+document.getElementById(
+'buyRate'
+).value = '';
+
+}
+
+calculateBuyAmount();
+
+document.getElementById(
+'buyCurrentStock'
+).innerHTML =
+
+'Current Stock : '
+
++
+
+getCurrentStock(product);
+
+}
+
+function calculateBuyAmount(){
+
+let qty =
+Number(
+document.getElementById(
+'buyQty'
+).value
+)||0;
+
+let rate =
+Number(
+document.getElementById(
+'buyRate'
+).value
+)||0;
+
+document.getElementById(
+'buyAmount'
+).value =
+qty * rate;
+
+}
+
+
 function getNextStockId(){
 
 if(stockData.length===0)
@@ -1723,7 +1918,10 @@ let stock={
 
 id:getNextStockId(),
 
-date,
+date:
+new Date(date + ' ' +
+new Date().toLocaleTimeString()
+).toLocaleString(),
 
 product,
 
@@ -1964,7 +2162,12 @@ table.innerHTML += `
 
 <td>${s.id}</td>
 
-<td>${s.date}</td>
+<td>
+
+${new Date(s.date)
+.toLocaleString()}
+
+</td>
 
 <td>${s.product}</td>
 
@@ -4145,6 +4348,8 @@ showLowStock();
 
 showStockReport();
 
+showBuyList();
+
 loadProductDropdown();
 
 updateTotalDue();
@@ -4257,7 +4462,7 @@ document.getElementById(
 'stockFilterDate'
 ).value;
 
-let product =
+let productFilter =
 document.getElementById(
 'stockFilterProduct'
 ).value;
@@ -4266,83 +4471,146 @@ table.innerHTML = `
 
 <tr>
 
-<th>ID</th>
-<th>Date</th>
 <th>Product</th>
-<th>Qty</th>
-<th>Rate</th>
-<th>Total</th>
+<th>Total Buy Qty</th>
+<th>Sold Qty</th>
 <th>Current Qty</th>
-<th>Current Total</th>
+<th>Buy Total</th>
+<th>Current Value</th>
 
 </tr>
 
 `;
 
-let grand = 0;
-
-let currentGrand = 0;
+let summary = {};
 
 stockData.forEach(s=>{
 
-let ok = true;
+if(
+date &&
+getOnlyDate(s.date)!==date
+){
 
-if(date && s.date!==date){
-
-ok = false;
-
-}
-
-if(product && s.product!==product){
-
-ok = false;
+return;
 
 }
 
-if(ok){
+if(
+productFilter &&
+s.product!==productFilter
+){
 
-grand += Number(s.total);
+return;
 
-let currentQty =
-getCurrentStock(s.product);
+}
 
-let currentTotal =
-currentQty * Number(s.rate);
+if(!summary[s.product]){
 
-currentGrand += currentTotal;
+summary[s.product]={
 
-table.innerHTML += `
+buyQty:0,
 
-<tr>
+soldQty:0,
 
-<td>${s.id}</td>
+currentQty:0,
 
-<td>${s.date}</td>
+buyTotal:0,
 
-<td>${s.product}</td>
+rate:Number(s.rate)
 
-<td>${s.qty}</td>
+};
 
-<td>${s.rate}</td>
+}
 
-<td>${s.total}</td>
-<td>${currentQty}</td>
+summary[s.product].buyQty +=
+Number(s.qty);
 
-<td>${currentTotal}</td>
+summary[s.product].buyTotal +=
+Number(s.total);
 
-</tr>
+});
 
-`;
+transactions.forEach(t=>{
+
+if(t.type==='Due'){
+
+if(summary[t.product]){
+
+summary[t.product].soldQty +=
+Number(t.qty);
+
+}
 
 }
 
 });
 
+cashSell.forEach(c=>{
+
+if(summary[c.product]){
+
+summary[c.product].soldQty +=
+Number(c.qty);
+
+}
+
+});
+
+let grandBuy = 0;
+
+let grandCurrent = 0;
+
+for(let product in summary){
+
+let item = summary[product];
+
+item.currentQty =
+item.buyQty - item.soldQty;
+
+let currentValue =
+item.currentQty * item.rate;
+
+grandBuy += item.buyTotal;
+
+grandCurrent += currentValue;
+
 table.innerHTML += `
 
 <tr>
 
-<th colspan="5">
+<td>${product}</td>
+
+<td>${item.buyQty}</td>
+
+<td>${item.soldQty}</td>
+
+<td style="
+font-weight:bold;
+color:
+${item.currentQty<=5?'red':'green'};
+">
+
+${item.currentQty}
+
+${item.currentQty<=5?'⚠️':''}
+
+</td>
+
+<td>${item.buyTotal}</td>
+
+<td>${currentValue}</td>
+
+</tr>
+
+`;
+
+}
+
+table.innerHTML += `
+
+<tr>
+
+<th colspan="4">
 
 Grand Total
 
@@ -4350,15 +4618,13 @@ Grand Total
 
 <th>
 
-${grand}
+${grandBuy}
 
 </th>
 
-<th></th>
-
 <th>
 
-${currentGrand}
+${grandCurrent}
 
 </th>
 
@@ -4430,6 +4696,390 @@ th,td{
 border:1px solid black;
 padding:8px;
 text-align:center;
+}
+
+</style>
+
+`);
+
+w.print();
+
+}
+
+function printStockEntry(){
+
+let table =
+document.getElementById(
+'stockTable'
+).cloneNode(true);
+
+table.querySelectorAll('tr')
+.forEach(row=>{
+
+if(row.cells.length>7){
+
+row.deleteCell(7);
+
+}
+
+});
+
+let w = window.open();
+
+let d =
+new Date().toLocaleString();
+
+w.document.write(`
+
+<h2 style="text-align:center;">
+Mohammod Ali Store
+</h2>
+
+<h3 style="text-align:center;">
+Stock Entry Report
+</h3>
+
+<p style="text-align:center;">
+Print Date & Time : ${d}
+</p>
+
+${table.outerHTML}
+
+<style>
+
+@page{
+size:A4;
+margin:10mm;
+}
+
+body{
+font-family:Arial;
+padding:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th,td{
+border:1px solid black;
+padding:8px;
+text-align:center;
+font-size:12px;
+}
+
+h2,h3,p{
+margin:5px;
+}
+
+</style>
+
+`);
+
+w.print();
+
+}
+
+
+function saveBuyList(){
+
+let date =
+document.getElementById(
+'buyDate'
+).value;
+
+let product =
+document.getElementById(
+'buyProduct'
+).value;
+
+let qty =
+document.getElementById(
+'buyQty'
+).value;
+
+let rate =
+document.getElementById(
+'buyRate'
+).value;
+
+let amount =
+document.getElementById(
+'buyAmount'
+).value;
+
+if(
+!date ||
+!product ||
+!qty ||
+!rate
+){
+
+alert('Fill All Fields');
+
+return;
+
+}
+
+let item={
+
+id:buyList.length+1,
+
+date:
+new Date(date + ' ' +
+new Date().toLocaleTimeString()
+).toLocaleString(),
+
+product,
+
+qty:Number(qty),
+
+rate:Number(rate),
+
+amount:Number(amount)
+
+};
+
+buyList.push(item);
+
+saveData();
+
+showBuyList();
+
+document.getElementById(
+'buyQty'
+).value='';
+
+document.getElementById(
+'buyAmount'
+).value='';
+
+alert('Buy List Saved');
+
+}
+
+function showBuyList(){
+
+let table =
+document.getElementById(
+'buyTable'
+);
+
+let date =
+document.getElementById(
+'buySearchDate'
+).value;
+
+table.innerHTML = `
+
+<tr>
+
+<th>ID</th>
+<th>Date</th>
+<th>Product</th>
+<th>Qty</th>
+<th>Rate</th>
+<th>Amount</th>
+<th>Action</th>
+
+</tr>
+
+`;
+
+let total = 0;
+
+buyList.forEach(b=>{
+
+let rowDate =
+getOnlyDate(b.date);
+
+if(date==='' || rowDate===date){
+
+total += Number(b.amount);
+
+table.innerHTML += `
+
+<tr>
+
+<td>${b.id}</td>
+
+<td>
+
+${getOnlyDate(b.date)}
+
+</td>
+
+<td>${b.product}</td>
+
+<td>${b.qty}</td>
+
+<td>${b.rate}</td>
+
+<td>${b.amount}</td>
+
+<td>
+
+<div class="action-btn">
+
+<button class="delete-btn"
+
+onclick="deleteBuyItem(${b.id})">
+
+Delete
+
+</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+}
+
+});
+
+table.innerHTML += `
+
+<tr>
+
+<th colspan="5">
+
+Total
+
+</th>
+
+<th>
+
+${total}
+
+</th>
+
+</tr>
+
+`;
+
+}
+
+function deleteBuyItem(id){
+
+if(!confirm('Delete Item?'))
+return;
+
+buyList =
+buyList.filter(
+b=>b.id!==id
+);
+
+saveData();
+
+showBuyList();
+
+alert('Deleted');
+
+}
+
+function deleteBuyDate(){
+
+let date =
+document.getElementById(
+'buySearchDate'
+).value;
+
+if(!date){
+
+alert('Select Date');
+
+return;
+
+}
+
+if(!confirm('Delete All List?'))
+return;
+
+buyList =
+buyList.filter(b=>
+getOnlyDate(b.date)!==date
+);
+
+saveData();
+
+showBuyList();
+
+alert('Deleted');
+
+}
+
+function printBuyList(){
+
+let table =
+document.getElementById(
+'buyTable'
+).cloneNode(true);
+
+table.querySelectorAll('tr')
+.forEach(row=>{
+
+if(row.cells.length>6){
+
+row.deleteCell(6);
+
+}
+
+
+
+});
+
+let w = window.open();
+
+let d =
+new Date().toLocaleString();
+
+w.document.write(`
+
+<h2 style="text-align:center;">
+Mohammod Ali Store
+</h2>
+
+<h3 style="text-align:center;">
+Buy List
+</h3>
+
+<p style="text-align:center;">
+Print Date & Time : ${d}
+</p>
+
+${table.outerHTML}
+
+<style>
+
+@page{
+size:A5;
+margin:10mm;
+}
+
+body{
+font-family:Arial;
+padding:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+table-layout:fixed;
+}
+
+th,td{
+border:1px solid black;
+padding:3px;
+text-align:center;
+font-size:10px;
+line-height:1.1;
 }
 
 </style>
