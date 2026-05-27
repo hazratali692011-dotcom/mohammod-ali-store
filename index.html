@@ -267,6 +267,24 @@ line-height:1.5;
 </div>
 
 <div class="summary-box"
+style="background:#17a2b8;color:white;">
+
+Today Profit<br>
+
+<span id="todayProfit">0</span> Tk
+
+</div>
+
+<div class="summary-box"
+style="background:#343a40;color:white;">
+
+Net Profit<br>
+
+<span id="netProfit">0</span> Tk
+
+</div>
+
+<div class="summary-box"
 style="background:#6f42c1;color:white;">
 
 Total Sell<br>
@@ -381,6 +399,14 @@ Price List
 Buy List
 </button>
 
+<button onclick="showSection('expenseSection')">
+Expense
+</button>
+
+<button onclick="showSection('expenseReportSection')">
+Expense Report
+</button>
+
 </div>
 
 <table id="dashboardTable"></table>
@@ -394,7 +420,8 @@ class="card section">
 <input id="name"
 placeholder="Customer Name">
 
-<input id="phone"
+<input type="tel"
+id="phone"
 placeholder="Phone Number">
 
 <input id="area"
@@ -768,6 +795,148 @@ Back Dashboard
 
 </div>
 
+<div id="expenseReportSection"
+class="card section">
+
+<h3>Expense Report</h3>
+
+<input type="date"
+id="expenseReportDate">
+
+<input type="month"
+id="expenseReportMonth">
+
+<button
+onclick="showExpenseReport()">
+
+Show Report
+
+</button>
+
+<button
+onclick="printExpenseReport()">
+
+Print A4
+
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Type</th>
+
+<th>Details</th>
+
+<th>Qty</th>
+
+<th>Amount</th>
+
+<th>Date</th>
+
+</tr>
+
+</thead>
+
+<tbody
+id="expenseReportTable">
+</tbody>
+
+<tfoot>
+
+<tr>
+
+<th colspan="4">
+
+Total
+
+</th>
+
+<th id="expenseReportTotal">
+
+0
+
+</th>
+
+<th></th>
+
+</tr>
+
+</tfoot>
+
+</table>
+
+</div>
+
+<div id="expenseSection"
+class="card section">
+
+<h3>Expense</h3>
+
+<h4>Product Expense</h4>
+
+<input type="date"
+id="expenseDate">
+
+<select id="expenseProduct">
+</select>
+
+<input type="number"
+id="expenseQty"
+placeholder="Quantity">
+
+<input type="number"
+id="expenseAmount"
+placeholder="Amount"
+readonly>
+
+<button onclick="saveProductExpense()">
+
+Save Product Expense
+
+</button>
+
+<hr>
+
+<h4>Cash Expense</h4>
+
+<input type="date"
+id="cashExpenseDate">
+
+<input
+id="cashExpensePurpose"
+placeholder="Purpose">
+
+<input type="number"
+id="cashExpenseAmount"
+placeholder="Amount">
+
+<button onclick="saveCashExpense()">
+
+Save Cash Expense
+
+</button>
+
+<button class="back-btn"
+onclick="goDashboard()">
+
+Back Dashboard
+
+</button>
+
+</div>
+
 <div id="buyListSection"
 class="card section">
 
@@ -915,10 +1084,23 @@ localStorage.getItem('stockData')
 ) || [];
 
 let buyList = JSON.parse(
+localStorage.getItem('buyList')
+) || [];
+
+let productExpense =
+JSON.parse(
 
 localStorage.getItem(
-'buyList'
+'productExpense'
+)
 
+) || [];
+
+let cashExpense =
+JSON.parse(
+
+localStorage.getItem(
+'cashExpense'
 )
 
 ) || [];
@@ -964,6 +1146,28 @@ localStorage.setItem(
 'buyList',
 
 JSON.stringify(buyList)
+
+);
+
+localStorage.setItem(
+
+'productExpense',
+
+JSON.stringify(
+productExpense
+
+)
+
+);
+
+localStorage.setItem(
+
+'cashExpense',
+
+JSON.stringify(
+cashExpense
+
+)
 
 );
 localStorage.setItem(
@@ -1192,6 +1396,10 @@ document.getElementById('product');
 
 let cashProduct =
 document.getElementById('cashProduct');
+let expenseProduct =
+document.getElementById(
+'expenseProduct'
+);
 
 dueProduct.innerHTML =
 '<option value="">Select Product</option>';
@@ -1208,6 +1416,8 @@ priceProduct.innerHTML =
 '<option value="">Select Product</option>';
 
 buyProduct.innerHTML =
+'<option value="">Select Product</option>';
+expenseProduct.innerHTML =
 '<option value="">Select Product</option>';
 
 products.forEach(p=>{
@@ -1253,6 +1463,14 @@ ${p.name}
 `;
 
 buyProduct.innerHTML += `
+
+<option value="${p.name}">
+${p.name}
+</option>
+
+`;
+
+expenseProduct.innerHTML += `
 
 <option value="${p.name}">
 ${p.name}
@@ -1633,6 +1851,14 @@ document.getElementById('buyProduct')
 document.getElementById('buyQty')
 .addEventListener('input',calculateBuyAmount);
 
+document.getElementById('expenseProduct')
+.addEventListener('change',
+calculateExpenseAmount);
+
+document.getElementById('expenseQty')
+.addEventListener('input',
+calculateExpenseAmount);
+
 function calculateStockTotal(){
 
 let qty =
@@ -1806,6 +2032,49 @@ document.getElementById(
 +
 
 getCurrentStock(product);
+
+}
+
+function calculateExpenseAmount(){
+
+let product =
+document.getElementById(
+'expenseProduct'
+).value;
+
+let qty =
+Number(
+document.getElementById(
+'expenseQty'
+).value
+)||0;
+
+let last = null;
+
+stockData.forEach(s=>{
+
+if(s.product===product){
+
+last = s;
+
+}
+
+});
+
+if(last){
+
+document.getElementById(
+'expenseAmount'
+).value =
+qty * Number(last.rate);
+
+}else{
+
+document.getElementById(
+'expenseAmount'
+).value='';
+
+}
 
 }
 
@@ -2042,7 +2311,19 @@ sold += Number(c.qty);
 
 });
 
-return stockIn - sold;
+let expenseOut = 0;
+
+productExpense.forEach(e=>{
+
+if(e.product===productName){
+
+expenseOut += Number(e.qty);
+
+}
+
+});
+
+return stockIn - sold - expenseOut;
 
 }
 
@@ -2542,6 +2823,7 @@ showLowStock();
 updateTotalDue();
 
 updateDailySummary();
+calculateProfit();
 
 document.getElementById('product').value='';
 
@@ -2550,6 +2832,7 @@ document.getElementById('qty').value='';
 document.getElementById('amount').value='';
 
 document.getElementById('dueAuthor').value='';
+
 
 alert('Due Added');
 
@@ -2701,10 +2984,12 @@ showProfile();
 updateTotalDue();
 
 updateDailySummary();
+calculateProfit();
 
 document.getElementById('payAmount').value='';
 
 document.getElementById('paymentAuthor').value='';
+
 
 alert('Payment Saved');
 
@@ -2823,6 +3108,7 @@ showStock();
 showLowStock();
 
 updateDailySummary();
+calculateProfit();
 
 showStockReport();
 
@@ -2852,6 +3138,420 @@ total += Number(c.due);
 
 document.getElementById('totalDue')
 .innerText = total;
+
+}
+
+function showExpenseReport(){
+
+let date =
+document.getElementById(
+'expenseReportDate'
+).value;
+
+let month =
+document.getElementById(
+'expenseReportMonth'
+).value;
+
+let table =
+document.getElementById(
+'expenseReportTable'
+);
+
+table.innerHTML='';
+
+let total = 0;
+
+let allExpense = [
+
+...productExpense,
+
+...cashExpense
+
+];
+
+let filtered =
+allExpense.filter(e=>{
+
+let d =
+new Date(e.date);
+
+let itemDate =
+d.toISOString()
+.split('T')[0];
+
+let itemMonth =
+itemDate.slice(0,7);
+
+if(date){
+
+return itemDate===date;
+
+}
+
+if(month){
+
+return itemMonth===month;
+
+}
+
+return true;
+
+});
+
+filtered.forEach(e=>{
+
+total += Number(e.amount);
+
+table.innerHTML += `
+
+<tr>
+
+<td>${e.id}</td>
+
+<td>${e.type}</td>
+
+<td>
+
+${e.product || e.purpose}
+
+</td>
+
+<td>
+
+${e.qty || '-'}
+
+</td>
+
+<td>${e.amount}</td>
+
+<td>
+
+${e.date}
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+document.getElementById(
+'expenseReportTotal'
+).innerText = total;
+
+}
+
+
+function printExpenseReport(){
+
+let table =
+
+document.getElementById(
+'expenseReportTable'
+).innerHTML;
+
+let total =
+
+document.getElementById(
+'expenseReportTotal'
+).innerText;
+
+let win =
+window.open('','','width=900,height=700');
+
+win.document.write(`
+
+<html>
+
+<head>
+
+<title>
+Expense Report
+</title>
+
+<style>
+
+body{
+
+font-family:Arial;
+
+padding:20px;
+
+text-align:center;
+
+}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+margin-top:20px;
+
+}
+
+th,td{
+
+border:1px solid black;
+
+padding:6px;
+
+font-size:12px;
+
+}
+
+h2,h3{
+
+margin:5px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>
+Mohammod Ali Store
+</h2>
+
+<h3>
+Expense Report
+</h3>
+
+<p>
+
+Print Date & Time :
+
+${new Date().toLocaleString()}
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Type</th>
+
+<th>Details</th>
+
+<th>Qty</th>
+
+<th>Amount</th>
+
+<th>Date</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${table}
+
+</tbody>
+
+<tfoot>
+
+<tr>
+
+<th colspan="4">
+
+Total
+
+</th>
+
+<th>
+
+${total}
+
+</th>
+
+<th></th>
+
+</tr>
+
+</tfoot>
+
+</table>
+
+</body>
+
+</html>
+
+`);
+
+win.document.close();
+
+win.print();
+
+}
+
+function calculateProfit(){
+
+let today =
+getOnlyDate(new Date());
+
+let todayProfit = 0;
+
+let grossProfit = 0;
+
+function getBuyRate(product){
+
+let last = null;
+
+stockData.forEach(s=>{
+
+if(s.product===product){
+
+last = s;
+
+}
+
+});
+
+if(last){
+
+return Number(last.rate);
+
+}
+
+return 0;
+
+}
+
+function getSellPrice(product){
+
+let item =
+sellPrices.find(
+p=>p.product===product
+);
+
+if(item){
+
+return Number(item.price);
+
+}
+
+return 0;
+
+}
+
+// Due Profit
+
+transactions.forEach(t=>{
+
+if(t.type==='Due'){
+
+let buy =
+getBuyRate(t.product);
+
+let sell =
+getSellPrice(t.product);
+
+let profit =
+
+(sell - buy)
+
+*
+
+Number(t.qty);
+
+grossProfit += profit;
+
+if(
+getOnlyDate(t.date)===today
+){
+
+todayProfit += profit;
+
+}
+
+}
+
+});
+
+// Cash Profit
+
+cashSell.forEach(c=>{
+
+let buy =
+getBuyRate(c.product);
+
+let sell =
+getSellPrice(c.product);
+
+let profit =
+
+(sell - buy)
+
+*
+
+Number(c.qty);
+
+grossProfit += profit;
+
+if(
+getOnlyDate(c.date)===today
+){
+
+todayProfit += profit;
+
+}
+
+});
+
+// Product Expense
+
+let productExp = 0;
+
+productExpense.forEach(e=>{
+
+productExp +=
+Number(e.amount);
+
+});
+
+// Cash Expense
+
+let cashExp = 0;
+
+cashExpense.forEach(e=>{
+
+cashExp +=
+Number(e.amount);
+
+});
+
+// Net Profit
+
+let netProfit =
+
+grossProfit
+-
+productExp
+-
+cashExp;
+
+document.getElementById(
+'todayProfit'
+).innerText =
+
+todayProfit.toFixed(2);
+
+document.getElementById(
+'netProfit'
+).innerText =
+
+netProfit.toFixed(2);
 
 }
 
@@ -3055,6 +3755,7 @@ showProfile();
 updateTotalDue();
 
 updateDailySummary();
+calculateProfit();
 
 alert('Deleted Successfully');
 
@@ -3252,6 +3953,7 @@ showStock();
 showLowStock();
 
 updateDailySummary();
+calculateProfit();
 
 alert('Cash Sell Updated');
 
@@ -3303,6 +4005,7 @@ showStock();
 
 showLowStock();
 updateDailySummary();
+calculateProfit();
 
 alert('Deleted Successfully');
 
@@ -3518,6 +4221,7 @@ showLowStock();
 
 updateDailySummary();
 
+calculateProfit();
 alert('Transaction Updated');
 
 }
@@ -3600,6 +4304,7 @@ showStock();
 showLowStock();
 
 updateDailySummary();
+calculateProfit();
 
 alert('Deleted Successfully');
 
@@ -3745,6 +4450,30 @@ Delete
 onclick="printProfile('${c.id}')">
 
 Print A5
+
+</button>
+
+<button class="save-btn"
+
+onclick="sendReminder('${c.id}')">
+
+Reminder
+
+</button>
+
+<button class="print-btn"
+
+onclick="sendDueSMSByCustomer('${c.id}')">
+
+Due SMS
+
+</button>
+
+<button class="delete-btn"
+
+onclick="sendPaymentSMSByCustomer('${c.id}')">
+
+Payment SMS
 
 </button>
 
@@ -4137,6 +4866,7 @@ showProfile();
 updateTotalDue();
 
 updateDailySummary();
+calculateProfit();
 
 showProducts();
 
@@ -4355,7 +5085,7 @@ loadProductDropdown();
 updateTotalDue();
 
 updateDailySummary();
-
+calculateProfit();
 });
 
 }
@@ -4783,6 +5513,160 @@ w.print();
 }
 
 
+function saveProductExpense(){
+
+let date =
+document.getElementById(
+'expenseDate'
+).value;
+
+let product =
+document.getElementById(
+'expenseProduct'
+).value;
+
+let qty =
+document.getElementById(
+'expenseQty'
+).value;
+
+let amount =
+document.getElementById(
+'expenseAmount'
+).value;
+
+if(
+!date ||
+!product ||
+!qty
+){
+
+alert('Fill All Fields');
+
+return;
+
+}
+
+let current =
+getCurrentStock(product);
+
+if(Number(qty)>current){
+
+alert('Stock Not Available');
+
+return;
+
+}
+
+let item={
+
+id:
+productExpense.length+1,
+
+type:'Product Expense',
+
+date:
+new Date(
+date + ' ' +
+new Date()
+.toLocaleTimeString()
+).toLocaleString(),
+
+product,
+
+qty:Number(qty),
+
+amount:Number(amount)
+
+};
+
+productExpense.push(item);
+
+saveData();
+
+document.getElementById(
+'expenseQty'
+).value='';
+
+document.getElementById(
+'expenseAmount'
+).value='';
+
+showStock();
+
+showStockReport();
+
+showLowStock();
+
+alert('Product Expense Saved');
+
+}
+
+function saveCashExpense(){
+
+let date =
+document.getElementById(
+'cashExpenseDate'
+).value;
+
+let purpose =
+document.getElementById(
+'cashExpensePurpose'
+).value;
+
+let amount =
+document.getElementById(
+'cashExpenseAmount'
+).value;
+
+if(
+!date ||
+!purpose ||
+!amount
+){
+
+alert('Fill All Fields');
+
+return;
+
+}
+
+let item={
+
+id:
+cashExpense.length+1,
+
+type:'Cash Expense',
+
+date:
+new Date(
+date + ' ' +
+new Date()
+.toLocaleTimeString()
+).toLocaleString(),
+
+purpose,
+
+amount:Number(amount)
+
+};
+
+cashExpense.push(item);
+
+saveData();
+
+document.getElementById(
+'cashExpensePurpose'
+).value='';
+
+document.getElementById(
+'cashExpenseAmount'
+).value='';
+
+alert('Cash Expense Saved');
+
+}
+
 function saveBuyList(){
 
 let date =
@@ -5087,6 +5971,297 @@ line-height:1.1;
 `);
 
 w.print();
+
+}
+
+function sendDueSMSByCustomer(id){
+
+let customer =
+customers.find(c=>
+String(c.id)===String(id)
+);
+
+if(!customer){
+
+alert('Customer Not Found');
+
+return;
+
+}
+
+let lastDue = null;
+
+for(let i=
+transactions.length-1;
+i>=0;
+i--){
+
+let t = transactions[i];
+
+if(
+String(t.customerId)===
+String(id)
+&&
+t.type==='Due'
+){
+
+lastDue = t;
+
+break;
+
+}
+
+}
+
+if(!lastDue){
+
+alert('No Due Found');
+
+return;
+
+}
+
+sendDueSMS(lastDue);
+
+}
+
+function sendPaymentSMS(transaction){
+
+let customer =
+customers.find(c=>
+String(c.id)===
+String(transaction.customerId)
+);
+
+if(!customer){
+
+alert('Customer Not Found');
+
+return;
+
+}
+
+let previousDue =
+
+Number(customer.due)
+
++
+
+Number(transaction.amount);
+
+let phone =
+customer.phone.replace(/\D/g,'');
+
+if(phone.length===10){
+
+phone = '880' + phone;
+
+}
+
+else if(phone.startsWith('01')){
+
+phone = '88' + phone;
+
+}
+
+let msg =
+
+`*Dear ${customer.name},*
+
+🟢 আপনার payment received হয়েছে।
+
+💵 Paid Amount: ${transaction.amount} Tk
+
+🔴 পূর্বের due ছিল: ${previousDue} Tk
+
+🟢 বর্তমান due: ${customer.due} Tk
+
+🟢 Date: ${new Date().toLocaleDateString()}
+
+*Mohammod Ali Store*`;
+
+let url =
+
+'https://wa.me/' +
+
+phone +
+
+'?text=' +
+
+encodeURIComponent(msg);
+
+window.location.href = url;
+
+}
+
+function sendDueSMS(transaction){
+
+let customer =
+customers.find(c=>
+String(c.id)===
+String(transaction.customerId)
+);
+
+if(!customer){
+
+alert('Customer Not Found');
+
+return;
+
+}
+
+let previousDue =
+
+Number(customer.due)
+
+-
+
+Number(transaction.amount);
+
+let phone =
+customer.phone.replace(/\D/g,'');
+
+if(phone.length===10){
+
+phone = '880' + phone;
+
+}
+
+else if(phone.startsWith('01')){
+
+phone = '88' + phone;
+
+}
+
+let msg =
+
+`*Dear ${customer.name},*
+
+🔴 আপনার পূর্বের due ছিল ${previousDue} Tk.
+
+🔴 আজ নতুন due যোগ হয়েছে ${transaction.amount} Tk.
+
+📦 Product: ${transaction.product}
+
+🔢 Quantity: ${transaction.qty}
+
+🔴 বর্তমান মোট due: ${customer.due} Tk
+
+🟢 Date: ${new Date().toLocaleDateString()}
+
+*Mohammod Ali Store*`;
+
+let url =
+
+'https://wa.me/' +
+
+phone +
+
+'?text=' +
+
+encodeURIComponent(msg);
+
+window.location.href = url;
+
+}
+
+function sendPaymentSMSByCustomer(id){
+
+let lastPayment = null;
+
+for(let i=
+transactions.length-1;
+i>=0;
+i--){
+
+let t = transactions[i];
+
+if(
+String(t.customerId)===
+String(id)
+&&
+t.type==='Payment'
+){
+
+lastPayment = t;
+
+break;
+
+}
+
+}
+
+if(!lastPayment){
+
+alert('No Payment Found');
+
+return;
+
+}
+
+sendPaymentSMS(lastPayment);
+
+}
+
+function sendReminder(id){
+
+let customer =
+customers.find(c=>c.id==id);
+
+if(!customer){
+
+alert('Customer Not Found');
+
+return;
+
+}
+
+if(!customer.phone){
+
+alert('Phone Number Missing');
+
+return;
+
+}
+
+let msg =
+
+`*Dear ${customer.name},*
+
+🔴 আপনার বর্তমান মোট due: ${customer.due} Tk
+
+⏳ অনুগ্রহ করে দ্রুত payment সম্পন্ন করুন।
+
+🟢 Date: ${new Date().toLocaleDateString()}
+
+*Mohammod Ali Store*`;
+
+let phone =
+customer.phone.replace(/\D/g,'');
+
+if(phone.length===10){
+
+phone = '880' + phone;
+
+}
+
+else if(phone.startsWith('01')){
+
+phone = '88' + phone;
+
+}
+
+let url =
+
+'https://wa.me/' +
+
+phone +
+
+'?text=' +
+
+encodeURIComponent(msg);
+
+window.location.href = url;
 
 }
 
