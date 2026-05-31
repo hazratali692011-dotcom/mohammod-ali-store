@@ -2471,7 +2471,8 @@ let stock =
 stockData.find(s=>s.id===id);
 
 document.getElementById('stockDate').value =
-stock.date;
+
+getOnlyDate(stock.date);
 
 document.getElementById('stockProduct').value =
 stock.product;
@@ -5360,8 +5361,6 @@ date:r[5]
 }
 
 }
-
-customers.forEach(c=>{
 
 loadDropdown();
 
