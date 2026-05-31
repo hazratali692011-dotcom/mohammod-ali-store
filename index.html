@@ -844,6 +844,7 @@ Back Dashboard
 <th>Amount</th>
 
 <th>Date</th>
+<th>Action</th>
 
 </tr>
 
@@ -1503,7 +1504,7 @@ alert('Product Name Required');
 return;
 
 }
-
+name = name.trim();
 
 let already =
 products.find(p=>
@@ -1681,6 +1682,7 @@ table.innerHTML = `
 
 <th>ID</th>
 <th>Product Name</th>
+<th>Action</th>
 
 </tr>
 
@@ -1695,6 +1697,17 @@ table.innerHTML += `
 <td>${p.id}</td>
 
 <td>${p.name}</td>
+<td>
+
+<button class="delete-btn"
+
+onclick="deleteProduct(${p.id})">
+
+Delete
+
+</button>
+
+</td>
 
 </tr>
 
@@ -1765,6 +1778,73 @@ Delete
 `;
 
 });
+
+}
+
+function deleteProduct(id){
+
+if(!confirm('Delete Product?'))
+return;
+
+let product =
+products.find(p=>p.id===id);
+
+if(!product) return;
+
+let used = false;
+
+transactions.forEach(t=>{
+
+if(t.product===product.name){
+
+used = true;
+
+}
+
+});
+
+cashSell.forEach(c=>{
+
+if(c.product===product.name){
+
+used = true;
+
+}
+
+});
+
+stockData.forEach(s=>{
+
+if(s.product===product.name){
+
+used = true;
+
+}
+
+});
+
+if(used){
+
+alert(
+'Product Already Used'
+);
+
+return;
+
+}
+
+products =
+products.filter(
+p=>p.id!==id
+);
+
+saveData();
+
+showProducts();
+
+loadProductDropdown();
+
+alert('Product Deleted');
 
 }
 
@@ -3230,6 +3310,23 @@ ${e.qty || '-'}
 ${e.date}
 
 </td>
+<td>
+
+<button class="delete-btn"
+
+onclick="deleteExpense(
+
+'${e.type}',
+
+${e.id}
+
+)">
+
+Delete
+
+</button>
+
+</td>
 
 </tr>
 
@@ -3240,6 +3337,45 @@ ${e.date}
 document.getElementById(
 'expenseReportTotal'
 ).innerText = total;
+
+}
+
+function deleteExpense(type,id){
+
+if(!confirm('Delete Expense?'))
+return;
+
+if(type==='Product Expense'){
+
+productExpense =
+
+productExpense.filter(
+e=>e.id!==id
+);
+
+}
+
+if(type==='Cash Expense'){
+
+cashExpense =
+
+cashExpense.filter(
+e=>e.id!==id
+);
+
+}
+
+saveData();
+
+showExpenseReport();
+
+showStock();
+
+showStockReport();
+
+calculateProfit();
+
+alert('Expense Deleted');
 
 }
 
@@ -3531,7 +3667,7 @@ Number(e.amount);
 
 });
 
-// Net Profit
+// FINAL NET PROFIT
 
 let netProfit =
 
@@ -3541,17 +3677,51 @@ productExp
 -
 cashExp;
 
+if(isNaN(netProfit)){
+
+netProfit = 0;
+
+}
+
+if(isNaN(todayProfit)){
+
+todayProfit = 0;
+
+}
+
+// সব data delete হলে 😄
+
+if(
+transactions.length===0
+&&
+cashSell.length===0
+&&
+productExpense.length===0
+&&
+cashExpense.length===0
+){
+
+grossProfit = 0;
+
+todayProfit = 0;
+
+netProfit = 0;
+
+}
+
 document.getElementById(
 'todayProfit'
 ).innerText =
 
-todayProfit.toFixed(2);
+Number(todayProfit)
+.toFixed(2);
 
 document.getElementById(
 'netProfit'
 ).innerText =
 
-netProfit.toFixed(2);
+Number(netProfit)
+.toFixed(2);
 
 }
 
