@@ -313,18 +313,6 @@ Due Sell<br>
 
 </div>
 
-<div id="lowStockBox"
-style="display:none;">
-
-<h3 style="color:red;">
-
-⚠️ Low Stock Alert
-
-</h3>
-
-<div id="lowStockList"></div>
-
-</div>
 
 <div class="summary-box"
 style="background:red;color:white;font-size:18px;">
@@ -426,6 +414,10 @@ placeholder="Phone Number">
 
 <input id="area"
 placeholder="Area">
+
+<input type="number"
+id="previousDue"
+placeholder="Previous Due (Optional)">
 
 <button onclick="saveCustomer()">
 Save Customer
@@ -1838,6 +1830,36 @@ products.filter(
 p=>p.id!==id
 );
 
+let uploadData={
+
+action:'deleteProduct',
+
+id:id
+
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
+})
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+});
+
 saveData();
 
 showProducts();
@@ -1879,6 +1901,36 @@ sellPrices.filter(
 p=>p.id!==id
 );
 
+let uploadData={
+
+action:'deleteSellPrice',
+
+id:id
+
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
+})
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+});
+
 saveData();
 
 showPriceList();
@@ -1900,6 +1952,11 @@ customer.phone;
 
 document.getElementById('area').value =
 customer.area;
+
+document.getElementById(
+'previousDue'
+).value =
+customer.due;
 
 editCustomerId = id;
 
@@ -2255,7 +2312,6 @@ saveData();
 showStock();
 
 showStockReport();
-showLowStock();
 
 alert('Stock Updated');
 
@@ -2340,7 +2396,7 @@ saveData();
 showStock();
 
 showStockReport();
-showLowStock();
+
 
 document.getElementById('stockQty').value='';
 
@@ -2449,7 +2505,7 @@ showStock();
 
 showStockReport();
 
-showLowStock();
+
 
 let uploadData={
 
@@ -2605,6 +2661,36 @@ document.getElementById('phone').value.trim();
 let area =
 document.getElementById('area').value.trim();
 
+let previousDue =
+
+Number(
+
+document.getElementById(
+'previousDue'
+).value
+
+) || 0;
+
+let duplicatePhone =
+
+customers.find(c=>
+
+c.phone===phone
+
+&&
+
+c.id!=editCustomerId
+
+);
+
+if(duplicatePhone){
+
+alert('Phone Already Exists');
+
+return;
+
+}
+
 if(!name){
 
 alert('Customer Name Required');
@@ -2646,7 +2732,7 @@ phone:phone,
 
 area:area,
 
-due:0,
+due:previousDue,
 
 registerDate:new Date().toLocaleString()
 
@@ -2699,7 +2785,9 @@ document.getElementById('name').value='';
 document.getElementById('phone').value='';
 
 document.getElementById('area').value='';
-
+document.getElementById(
+'previousDue'
+).value='';
 editCustomerId = null;
 
 alert('Customer Updated');
@@ -2720,7 +2808,7 @@ phone:phone,
 
 area:area,
 
-due:0,
+due:previousDue,
 
 registerDate:new Date().toLocaleString()
 
@@ -2753,6 +2841,9 @@ document.getElementById('name').value='';
 document.getElementById('phone').value='';
 
 document.getElementById('area').value='';
+document.getElementById(
+'previousDue'
+).value='';
 
 editCustomerId = null;
 
@@ -2898,7 +2989,6 @@ showProfile();
 showDashboard();
 showStock();
 
-showLowStock();
 
 updateTotalDue();
 
@@ -3185,7 +3275,7 @@ showCashSell();
 
 showStock();
 
-showLowStock();
+
 
 updateDailySummary();
 calculateProfit();
@@ -3366,6 +3456,35 @@ e=>e.id!==id
 }
 
 saveData();
+let uploadData={
+
+action:'deleteExpense',
+
+id:id
+
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
+})
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+});
 
 showExpenseReport();
 
@@ -3886,7 +4005,9 @@ let uploadData={
 
 action:'deleteCustomer',
 
-id:id
+id:id,
+
+name:customer.name
 
 };
 
@@ -4120,7 +4241,7 @@ showCashSell();
 
 showStock();
 
-showLowStock();
+
 
 updateDailySummary();
 calculateProfit();
@@ -4173,7 +4294,6 @@ showCashSell();
 
 showStock();
 
-showLowStock();
 updateDailySummary();
 calculateProfit();
 
@@ -4387,7 +4507,6 @@ showTransactions();
 
 showStock();
 
-showLowStock();
 
 updateDailySummary();
 
@@ -4471,7 +4590,6 @@ showTransactions();
 showProfile();
 showStock();
 
-showLowStock();
 
 updateDailySummary();
 calculateProfit();
@@ -5042,7 +5160,6 @@ showProducts();
 
 showPriceList();
 showStock();
-showLowStock();
 
 showStockReport();
 
@@ -5067,6 +5184,10 @@ products = [];
 
 stockData = [];
 sellPrices = [];
+
+productExpense = [];
+
+cashExpense = [];
 
 for(let i=1;i<data.customers.length;i++){
 
@@ -5196,35 +5317,51 @@ price:r[2]
 
 }
 
+for(let i=1;i<data.expense.length;i++){
+
+let r = data.expense[i];
+
+if(r[1]==='Product Expense'){
+
+productExpense.push({
+
+id:r[0],
+
+type:r[1],
+
+product:r[2],
+
+qty:r[3],
+
+amount:r[4],
+
+date:r[5]
+
+});
+
+}
+
+if(r[1]==='Cash Expense'){
+
+cashExpense.push({
+
+id:r[0],
+
+type:r[1],
+
+purpose:r[2],
+
+amount:r[4],
+
+date:r[5]
+
+});
+
+}
+
+}
+
 customers.forEach(c=>{
-
-let totalDue = 0;
-
-transactions.forEach(t=>{
-
-if(
-String(t.customerId)===String(c.id)
-){
-
-if(t.type==='Due'){
-
-totalDue += Number(t.amount);
-
-}
-
-if(t.type==='Payment'){
-
-totalDue -= Number(t.amount);
-
-}
-
-}
-
-});
-
-c.due = totalDue;
-
-});
 
 loadDropdown();
 
@@ -5244,7 +5381,6 @@ showPriceList();
 
 showStock();
 
-showLowStock();
 
 showStockReport();
 
@@ -5292,63 +5428,6 @@ loadOnlineData();
 
 },30000);
 
-function showLowStock(){
-
-let box =
-document.getElementById(
-'lowStockBox'
-);
-
-let list =
-document.getElementById(
-'lowStockList'
-);
-
-list.innerHTML='';
-
-let found = false;
-
-products.forEach(p=>{
-
-let current =
-getCurrentStock(p.name);
-
-if(current<=5){
-
-found = true;
-
-list.innerHTML += `
-
-<div style="
-padding:5px;
-margin:5px 0;
-background:#ffe5e5;
-border-radius:5px;
-font-weight:bold;
-">
-
-${p.name} →
-${current}
-
-</div>
-
-`;
-
-}
-
-});
-
-if(found){
-
-box.style.display='block';
-
-}else{
-
-box.style.display='none';
-
-}
-
-}
 
 function showStockReport(){
 
@@ -5752,6 +5831,46 @@ amount:Number(amount)
 
 productExpense.push(item);
 
+let uploadData={
+
+action:'saveExpense',
+
+id:item.id,
+
+type:item.type,
+
+details:item.product,
+
+qty:item.qty,
+
+amount:item.amount,
+
+date:item.date
+
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
+})
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+});
+
 saveData();
 
 document.getElementById(
@@ -5766,7 +5885,9 @@ showStock();
 
 showStockReport();
 
-showLowStock();
+calculateProfit();
+
+showExpenseReport();
 
 alert('Product Expense Saved');
 
@@ -5823,6 +5944,46 @@ amount:Number(amount)
 
 cashExpense.push(item);
 
+let uploadData={
+
+action:'saveExpense',
+
+id:item.id,
+
+type:item.type,
+
+details:item.purpose,
+
+qty:'-',
+
+amount:item.amount,
+
+date:item.date
+
+};
+
+fetch(scriptURL,{
+
+method:'POST',
+
+body:JSON.stringify(uploadData)
+
+})
+
+.catch(()=>{
+
+pendingUploads.push(uploadData);
+
+localStorage.setItem(
+
+'pendingUploads',
+
+JSON.stringify(pendingUploads)
+
+);
+
+});
+
 saveData();
 
 document.getElementById(
@@ -5832,6 +5993,10 @@ document.getElementById(
 document.getElementById(
 'cashExpenseAmount'
 ).value='';
+
+calculateProfit();
+
+showExpenseReport();
 
 alert('Cash Expense Saved');
 
